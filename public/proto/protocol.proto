@@ -32,16 +32,20 @@ message MessageSend {
 message MessageBody {
     int32 type = 1; // 消息类型
     string text = 2; // 文本消息
-    int32 voice_size = 3; // 语音包大小
-    int32 voice_duration = 4; // 语音时长
-
-
+    Voice voice = 3; // 语音消息
+    Image image = 4; // 图片消息
 }
 
-
 message Voice {
-    int32 voice_size = 3; // 语音包大小
-    int32 voice_duration = 4; // 语音时长
+    string uuid = 1;
+    int32 size = 2; // 语音包大小
+    int32 duration = 3; // 语音时长
+    string url = 4; // 语音文件URL
+}
+
+message Image {
+    string uuid = 1;
+    string url = 2;
 }
 
 // 消息发送回执
