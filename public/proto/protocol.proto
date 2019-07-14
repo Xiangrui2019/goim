@@ -23,7 +23,7 @@ message SyncTrigger {
 message MessageSend {
     int32 receiver_type = 1; // 接收者类型，1：user;2:group
     int64 receiver_id = 2; // 用户id或者群组id
-    int32 type = 3; // 消息类型，1：文字；2：语音；3：图片
+    int32 type = 3; // 消息类型，1：文字；2：语音；3：图片;4:文件
     string content = 4; // 消息内容
     int64 send_sequence = 5; // 发送序列号
     int64 send_time = 6; // 消息发送时间戳，精确到毫秒
@@ -34,6 +34,8 @@ message MessageBody {
     string text = 2; // 文本消息
     Voice voice = 3; // 语音消息
     Image image = 4; // 图片消息
+    File file = 5; // 文件消息
+    string content = 6; // 自定义消息类型
 }
 
 message Voice {
@@ -44,14 +46,23 @@ message Voice {
 }
 
 message Image {
-    string uuid = 1;
-    string url = 2;
+    int32 width = 1;
+    string height = 2;
+    string url = 3;
+    string thumbnail_url = 4;
+}
+
+message File {
+    int32 size = 1;
+    string name = 2;
+    string url = 3;
 }
 
 // 消息发送回执
 message MessageSendACK {
     int64 send_sequence = 1; // 序列号
     int32 code = 2; // 消息发送状态
+    string err_info = 3 ;// 错误信息
 }
 
 // 消息投递
