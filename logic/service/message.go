@@ -9,6 +9,8 @@ import (
 	"goim/public/imerror"
 	"goim/public/logger"
 	"goim/public/transfer"
+
+	"go.uber.org/zap"
 )
 
 const (
@@ -181,11 +183,11 @@ func (*messageService) SendToUser(ctx *imctx.Context, userId int64, message *mod
 		message := transfer.Message{DeviceId: v.Id, Type: transfer.MessageTypeMail, Messages: []transfer.MessageItem{messageItem}}
 		produce.PublishMessage(message)
 
-		logger.Sugar.Infow("消息投递",
-			"device_id:", message.DeviceId,
-			"user_id", userId,
-			"type", message.Type,
-			"messages", message.GetLog())
+		logger.Logger.Info("消息投递",
+			zap.Int64("device_id:", message.DeviceId),
+			zap.Int64("user_id", userId),
+			zap.Int32("type", message.Type),
+			zap.String("messages", message.GetLog()))
 	}
 	return nil
 }

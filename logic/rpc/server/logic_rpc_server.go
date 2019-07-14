@@ -8,6 +8,8 @@ import (
 	"goim/public/imctx"
 	"goim/public/logger"
 	"goim/public/transfer"
+
+	"go.uber.org/zap"
 )
 
 func Context() *imctx.Context {
@@ -44,11 +46,11 @@ func (s *LogicRPCServer) SignIn(signIn transfer.SignIn, ack *transfer.SignInACK)
 		ack.Message = "fail"
 	}
 
-	logger.Sugar.Infow("设备登录",
-		"device_id:", signIn.DeviceId,
-		"user_id", signIn.UserId,
-		"token", signIn.Token,
-		"result", ack.Message)
+	logger.Logger.Info("设备登录",
+		zap.Int64("device_id:", signIn.DeviceId),
+		zap.Int64("user_id", signIn.UserId),
+		zap.String("token", signIn.Token),
+		zap.Any("result", ack.Message))
 
 	return nil
 }

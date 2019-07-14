@@ -114,7 +114,7 @@ func handleMessageSend(msg *nsq.Message) error {
 		zap.Int64("message_id", send.MessageId),
 		zap.Int64("send_sequence", send.SendSequence))
 
-	// 检查消息是否重复发送
+	// 检查消息是否重复发送,todo:用随机数代替
 	sendSequence, err := dao.DeviceSendSequenceDao.Get(ctx, send.SenderDeviceId)
 	if err != nil {
 		logger.Sugar.Error(err)

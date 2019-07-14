@@ -11,7 +11,7 @@ var UserSequenceDao = new(userSequenceDao)
 
 // Add 添加
 func (*userSequenceDao) Add(ctx *imctx.Context, userId int64, sequence int64) error {
-	_, err := ctx.Session.Exec("insert into t_user_sequence (user_id,sequence) values(?,?)", userId, sequence)
+	_, err := ctx.Session.Exec("insert into user_sequence (user_id,sequence) values(?,?)", userId, sequence)
 	if err != nil {
 		logger.Sugar.Error(err)
 		return err
@@ -21,7 +21,7 @@ func (*userSequenceDao) Add(ctx *imctx.Context, userId int64, sequence int64) er
 
 // Increase sequence++
 func (*userSequenceDao) Increase(ctx *imctx.Context, userId int64) error {
-	_, err := ctx.Session.Exec("update t_user_sequence set sequence = sequence + 1 where user_id = ?", userId)
+	_, err := ctx.Session.Exec("update user_sequence set sequence = sequence + 1 where user_id = ?", userId)
 	if err != nil {
 		logger.Sugar.Error(err)
 	}
@@ -31,7 +31,7 @@ func (*userSequenceDao) Increase(ctx *imctx.Context, userId int64) error {
 // GetSequence 获取自增序列
 func (*userSequenceDao) GetSequence(ctx *imctx.Context, userId int64) (int64, error) {
 	var sequence int64
-	err := ctx.Session.QueryRow("select sequence from t_user_sequence where user_id = ?", userId).
+	err := ctx.Session.QueryRow("select sequence from user_sequence where user_id = ?", userId).
 		Scan(&sequence)
 	if err != nil {
 		logger.Sugar.Error(err)

@@ -11,7 +11,7 @@ var DeviceSyncSequenceDao = new(deviceSyncSequenceDao)
 
 // Add 添加设备同步序列号记录
 func (*deviceSyncSequenceDao) Add(ctx *imctx.Context, deviceId int64, syncSequence int64) error {
-	_, err := ctx.Session.Exec("insert into t_device_sync_sequence(device_id,sync_sequence) values(?,?)",
+	_, err := ctx.Session.Exec("insert into device_sync_sequence(device_id,sync_sequence) values(?,?)",
 		deviceId, syncSequence)
 	if err != nil {
 		logger.Sugar.Error(err)
@@ -22,7 +22,7 @@ func (*deviceSyncSequenceDao) Add(ctx *imctx.Context, deviceId int64, syncSequen
 
 // Get 获取设备同步序列号
 func (*deviceSyncSequenceDao) Get(ctx *imctx.Context, id int64) (int64, error) {
-	row := ctx.Session.QueryRow("select sync_sequence from t_device_sync_sequence where device_id = ?", id)
+	row := ctx.Session.QueryRow("select sync_sequence from device_sync_sequence where device_id = ?", id)
 	var syncSequence int64
 	err := row.Scan(&syncSequence)
 	if err != nil {
@@ -36,8 +36,8 @@ func (*deviceSyncSequenceDao) Get(ctx *imctx.Context, id int64) (int64, error) {
 func (*deviceSyncSequenceDao) GetMaxSyncSequenceByUserId(ctx *imctx.Context, userId int64) (int64, error) {
 	row := ctx.Session.QueryRow(`
 		select max(s.sync_sequence) 
-		from t_device d
-		left join t_device_sync_sequence s on d.id = s.device_id 
+		from device d
+		left join device_sync_sequence s on d.id = s.device_id 
 		where user_id = ?`, userId)
 	var syncSequence int64
 	err := row.Scan(&syncSequence)
@@ -50,7 +50,7 @@ func (*deviceSyncSequenceDao) GetMaxSyncSequenceByUserId(ctx *imctx.Context, use
 
 // UpdateSyncSequence 更新设备同步序列号
 func (*deviceSyncSequenceDao) UpdateSyncSequence(ctx *imctx.Context, deviceId int64, sequence int64) error {
-	_, err := ctx.Session.Exec("update t_device_sync_sequence set sync_sequence = ? where device_id = ?",
+	_, err := ctx.Session.Exec("update device_sync_sequence set sync_sequence = ? where device_id = ?",
 		sequence, deviceId)
 	if err != nil {
 		logger.Sugar.Error(err)

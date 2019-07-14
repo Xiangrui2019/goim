@@ -12,7 +12,7 @@ var GroupDao = new(groupDao)
 
 // Get 获取群组信息
 func (*groupDao) Get(ctx *imctx.Context, id int) (*model.Group, error) {
-	row := ctx.Session.QueryRow("select name from t_group where id = ?", id)
+	row := ctx.Session.QueryRow("select name from `group` where id = ?", id)
 	group := new(model.Group)
 	err := row.Scan(&group.Name)
 	if err != nil {
@@ -24,7 +24,7 @@ func (*groupDao) Get(ctx *imctx.Context, id int) (*model.Group, error) {
 
 // Insert 插入一条群组
 func (*groupDao) Add(ctx *imctx.Context, name string) (int64, error) {
-	result, err := ctx.Session.Exec("insert into t_group(name) value(?)", name)
+	result, err := ctx.Session.Exec("insert into `group`(name) value(?)", name)
 	if err != nil {
 		logger.Sugar.Error(err)
 		return 0, err

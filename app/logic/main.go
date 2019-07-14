@@ -24,7 +24,10 @@ func main() {
 	}()
 
 	// 启动web容器
-	controller.Engine.Run(conf.LogicHTTPListenIP)
+	err := controller.Engine.Run(conf.LogicHTTPListenIP)
+	if err != nil {
+		logger.Sugar.Error(err)
+	}
 }
 
 // RecoverPanic 恢复panic

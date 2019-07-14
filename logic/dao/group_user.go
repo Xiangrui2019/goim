@@ -11,7 +11,7 @@ type groupUserDao struct{}
 var GroupUserDao = new(groupUserDao)
 
 func (*groupUserDao) Get(ctx *imctx.Context, id int64) (*model.Group, error) {
-	row := ctx.Session.QueryRow("select id,name from t_group where id = ?", id)
+	row := ctx.Session.QueryRow("select id,name from `group` where id = ?", id)
 	var group model.Group
 	err := row.Scan(&group.Id, &group.Name)
 	if err != nil {
@@ -23,7 +23,7 @@ func (*groupUserDao) Get(ctx *imctx.Context, id int64) (*model.Group, error) {
 
 // ListGroupUser 获取群组用户信息
 func (*groupUserDao) ListGroupUser(ctx *imctx.Context, id int64) ([]model.GroupUser, error) {
-	sql := `select g.label,u.id,u.number,u.nickname,u.sex,u.avatar from t_group_user g left join t_user u on g.user_id = u.id where group_id = ?`
+	sql := `select g.label,u.id,u.number,u.nickname,u.sex,u.avatar from group_user g left join user u on g.user_id = u.id where group_id = ?`
 	rows, err := ctx.Session.Query(sql, id)
 	if err != nil {
 		return nil, err
@@ -44,7 +44,7 @@ func (*groupUserDao) ListGroupUser(ctx *imctx.Context, id int64) ([]model.GroupU
 
 // ListGroupUserId 获取群组用户id列表
 func (*groupUserDao) ListGroupUserId(ctx *imctx.Context, id int) ([]int, error) {
-	rows, err := ctx.Session.Query("select user_id t_group_user where group_id = ?", id)
+	rows, err := ctx.Session.Query("select user_id group_user where group_id = ?", id)
 	if err != nil {
 		logger.Sugar.Error(err)
 		return nil, err
@@ -64,7 +64,7 @@ func (*groupUserDao) ListGroupUserId(ctx *imctx.Context, id int) ([]int, error) 
 
 // ListByUser 获取用户群组id列表
 func (*groupUserDao) ListbyUserId(ctx *imctx.Context, userId int64) ([]int64, error) {
-	rows, err := ctx.Session.Query("select group_id from t_group_user where user_id = ?", userId)
+	rows, err := ctx.Session.Query("select group_id from group_user where user_id = ?", userId)
 	if err != nil {
 		logger.Sugar.Error(err)
 		return nil, err
@@ -84,7 +84,7 @@ func (*groupUserDao) ListbyUserId(ctx *imctx.Context, userId int64) ([]int64, er
 
 // Add 将用户添加到群组
 func (*groupUserDao) Add(ctx *imctx.Context, groupId int64, userId int64) error {
-	_, err := ctx.Session.Exec("insert ignore into t_group_user(group_id,user_id) values(?,?)",
+	_, err := ctx.Session.Exec("insert ignore into group_user(group_id,user_id) values(?,?)",
 		groupId, userId)
 	if err != nil {
 		logger.Sugar.Error(err)
@@ -95,7 +95,7 @@ func (*groupUserDao) Add(ctx *imctx.Context, groupId int64, userId int64) error 
 
 // Delete 将用户从群组删除
 func (d *groupUserDao) Delete(ctx *imctx.Context, groupId int64, userId int64) error {
-	_, err := ctx.Session.Exec("delete from t_group_user where group_id = ? and user_id = ?",
+	_, err := ctx.Session.Exec("delete from group_user where group_id = ? and user_id = ?",
 		groupId, userId)
 	if err != nil {
 		logger.Sugar.Error(err)
@@ -106,7 +106,7 @@ func (d *groupUserDao) Delete(ctx *imctx.Context, groupId int64, userId int64) e
 
 // UpdateLabel 更新用户群组备注
 func (*groupUserDao) UpdateLabel(ctx *imctx.Context, groupId int64, userId int64, label string) error {
-	_, err := ctx.Session.Exec("update t_group_user set label = ? where group_id = ? and user_id = ?",
+	_, err := ctx.Session.Exec("update group_user set label = ? where group_id = ? and user_id = ?",
 		label, groupId, userId)
 	if err != nil {
 		logger.Sugar.Error(err)
@@ -118,7 +118,7 @@ func (*groupUserDao) UpdateLabel(ctx *imctx.Context, groupId int64, userId int64
 // UserInGroup 用户是否在群组中
 func (*groupUserDao) UserInGroup(ctx *imctx.Context, groupId int64, userId int64) (bool, error) {
 	var count int
-	err := ctx.Session.QueryRow("select count(*) from t_group_user where group_id = ? and user_id = ?",
+	err := ctx.Session.QueryRow("select count(*) from group_user where group_id = ? and user_id = ?",
 		groupId, userId).
 		Scan(&count)
 	if err != nil {
