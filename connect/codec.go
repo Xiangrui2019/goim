@@ -3,28 +3,33 @@ package connect
 import (
 	"encoding/binary"
 	"errors"
+	"goim/public/logger"
 	"net"
 	"time"
 )
 
 const (
-	TypeLen       = 2                 // 消息类型字节数组长度
-	LenLen        = 2                 // 消息长度字节数组长度
-	HeadLen       = 4                 // 消息头部字节数组长度（消息类型字节数组长度+消息长度字节数组长度）
-	ContentMaxLen = 4092              // 消息体最大长度
-	BufLen        = ContentMaxLen + 4 // 缓冲buffer字节数组长度
+	TypeLen       = 2                       // 消息类型字节数组长度
+	LenLen        = 2                       // 消息长度字节数组长度
+	HeadLen       = TypeLen + LenLen        // 消息头部字节数组长度（消息类型字节数组长度+消息长度字节数组长度）
+	ContentMaxLen = 4092                    // 消息体最大长度
+	BufLen        = ContentMaxLen + HeadLen // 缓冲buffer字节数组长度
 
 )
 
-var ErrOutOfSize = errors.New("package content out of size") // package的content字节数组过大
+var (
+	ErrOutOfSize       = errors.New("package content out of size") // package的content字节数组过大
+	ErrIllegalValueLen = errors.New("illegal package length")      // 违法的包长度
+)
 
+// Codec 编解码器，用来处理tcp的拆包粘包
 type Codec struct {
 	Conn     net.Conn
 	ReadBuf  buffer // 读缓冲
 	WriteBuf []byte // 写缓冲
 }
 
-// newCodec 创建一个解码器
+// newCodec 创建一个编解码器
 func NewCodec(conn net.Conn) *Codec {
 	return &Codec{
 		Conn:     conn,
@@ -39,33 +44,41 @@ func (c *Codec) Read() (int, error) {
 }
 
 // Decode 解码数据
-func (c *Codec) Decode() (*Package, bool) {
+// Package 代表一个解码包
+// bool 标识是否还有可读数据
+func (c *Codec) Decode() (*Package, bool, error) {
 	var err error
 	// 读取数据类型
 	typeBuf, err := c.ReadBuf.seek(0, TypeLen)
 	if err != nil {
-		return nil, false
+		return nil, false, nil
 	}
 
 	// 读取数据长度
 	lenBuf, err := c.ReadBuf.seek(TypeLen, HeadLen)
 	if err != nil {
-		return nil, false
+		return nil, false, nil
 	}
 
 	// 读取数据内容
 	valueType := int(binary.BigEndian.Uint16(typeBuf))
 	valueLen := int(binary.BigEndian.Uint16(lenBuf))
 
+	// 数据的字节数组长度大于buffer的长度，返回错误
+	if valueLen > ContentMaxLen {
+		logger.Logger.Error(ErrIllegalValueLen.Error())
+		return nil, false, ErrIllegalValueLen
+	}
+
 	valueBuf, err := c.ReadBuf.read(HeadLen, valueLen)
 	if err != nil {
-		return nil, false
+		return nil, false, nil
 	}
 	message := Package{Code: valueType, Content: valueBuf}
-	return &message, true
+	return &message, true, nil
 }
 
-// Eecode 编码数据
+// Eecode 编码数据,todo 在业务服务器检查消息投递包的大小
 func (c *Codec) Eecode(pack Package, duration time.Duration) error {
 	contentLen := len(pack.Content)
 	if contentLen > ContentMaxLen {

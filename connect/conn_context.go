@@ -74,7 +74,13 @@ func (c *ConnContext) DoConn() {
 		}
 
 		for {
-			message, ok := c.Codec.Decode()
+			message, ok, err := c.Codec.Decode()
+			// 解码出错，需要中断连接
+			if err != nil {
+				logger.Logger.Error(err.Error())
+				c.Release()
+				return
+			}
 			if ok {
 				c.HandlePackage(message)
 				continue
@@ -259,12 +265,16 @@ func (c *ConnContext) HandleReadErr(err error) {
 
 // Release 释放TCP连接
 func (c *ConnContext) Release() {
+	// 从本地maneger中删除tcp连接
 	delete(c.DeviceId)
+
+	// 关闭tcp连接
 	err := c.Codec.Conn.Close()
 	if err != nil {
 		logger.Sugar.Error(err)
 	}
 
+	// 通知业务服务器设备下线
 	publishOffLine(transfer.OffLine{
 		DeviceId: c.DeviceId,
 		UserId:   c.UserId,

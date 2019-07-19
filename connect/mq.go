@@ -37,12 +37,12 @@ func NsqConsumer(topic, channel string, handle func(message *nsq.Message) error,
 
 // StartNsqConsume 启动nsq消费者，以后所有的消费者在这里注册
 func StartNsqConsumer() {
-	NsqConsumer(conf.ConnectTCPListenIP+"."+conf.ConnectTCPListenPort+".message", "1", handleMessage, 20)
-	NsqConsumer(conf.ConnectTCPListenIP+"."+conf.ConnectTCPListenPort+".message_send_ack", "1", handleMessageSendACK, 20)
+	NsqConsumer(conf.ConnectTCPListenIP+"."+conf.ConnectTCPListenPort+".message", "1", HandleMessage, 20)
+	NsqConsumer(conf.ConnectTCPListenIP+"."+conf.ConnectTCPListenPort+".message_send_ack", "1", HandleMessageSendACK, 20)
 }
 
-// handleMessage 处理消息投递
-func handleMessage(msg *nsq.Message) error {
+// HandleMessage 处理消息投递
+func HandleMessage(msg *nsq.Message) error {
 	// nsq消息解码
 	var message transfer.Message
 	err := json.Unmarshal(msg.Body, &message)
@@ -92,8 +92,8 @@ func handleMessage(msg *nsq.Message) error {
 	return nil
 }
 
-// handleMessageSendACK 处理消息发送回执
-func handleMessageSendACK(msg *nsq.Message) error {
+// HandleMessageSendACK 处理消息发送回执
+func HandleMessageSendACK(msg *nsq.Message) error {
 	// nsq消息解码
 	var ack transfer.MessageSendACK
 	err := json.Unmarshal(msg.Body, &ack)
