@@ -29,40 +29,53 @@ message MessageSend {
     int64 send_time = 6; // 消息发送时间戳，精确到毫秒
 }
 
+// 消息体
 message MessageBody {
-    int32 type = 1; // 消息类型
-    string text = 2; // 文本消息
-    Voice voice = 3; // 语音消息
-    Image image = 4; // 图片消息
-    File file = 5; // 文件消息
-    string content = 6; // 自定义消息类型
+    MessageType message_type = 1; // 消息类型
+    MessageContent message_content = 2; // 消息内容
 }
 
-message Voice {
-    string uuid = 1;
-    int32 size = 2; // 语音包大小
-    int32 duration = 3; // 语音时长
-    string url = 4; // 语音文件URL
+// 消息类型
+enum MessageType {
+    Defalut = 0; // 占位，无意义
+    Text = 1; // 文本
+    Face = 2; // 表情
+    Voice = 3; // 声音
+    Image = 4; // 图片
+    File = 5; // 文件
+    Location = 6; // 定位
+    custom = 7; // 自定义
 }
 
-message Image {
-    int32 width = 1;
-    string height = 2;
-    string url = 3;
-    string thumbnail_url = 4;
-}
+// 消息内容
+message MessageContent {
+    string text = 1; // 文本消息文本内容
 
-message File {
-    int32 size = 1;
-    string name = 2;
-    string url = 3;
+    string voice_uuid = 2;
+    int32 voice_size = 3; // 语音包大小
+    int32 voice_duration = 4; // 语音时长
+    string voice_url = 5; // 语音文件URL
+
+    int64 face_id = 6; // 表情id
+
+    int32 image_width = 7; // 图片宽度
+    int32 image_height = 8; // 图片长度
+    string image_url = 9; // 图片URL
+    string image_thumbnail_url = 10; // 图片缩略图url
+
+    int64 file_id = 11; // 文件id
+    string file_name = 12; // 文件名
+    int64 file_size = 13; // 文件大小
+    string file_url = 14; // 文件url
+
+    string data = 15; // 自定义消息类型数据
 }
 
 // 消息发送回执
 message MessageSendACK {
     int64 send_sequence = 1; // 序列号
     int32 code = 2; // 消息发送状态
-    string err_info = 3 ;// 错误信息
+    string err_info = 3; // 错误信息
 }
 
 // 消息投递
