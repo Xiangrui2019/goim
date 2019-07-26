@@ -16,10 +16,17 @@ message SignInACK {
 
 // 同步消息触发
 message SyncTrigger {
-    int64 sync_sequence = 2; // 已经同步的序列号
+    int64 sync_sequence = 1; // 已经同步的序列号
+    repeated GroupSyncSequence GroupSyncSequence = 2; // 超大群采用读扩散时的同步序列号
+
 }
 
-// 消息发送
+message GroupSyncSequence {
+    int64 group_id = 1; // 群组id
+    int64 sync_sequence = 2; // 同步序列号
+}
+
+// 消息发送 todo 增加@某人
 message MessageSend {
     int32 receiver_type = 1; // 接收者类型，1：user;2:group
     int64 receiver_id = 2; // 用户id或者群组id
