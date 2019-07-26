@@ -216,9 +216,6 @@ func (c *ConnContext) HandlePackageMessageSend(pack *Package) {
 	}
 
 	publishMessageSend(transferSend)
-	if err != nil {
-		logger.Sugar.Error(err)
-	}
 }
 
 // HandlePackageMessageACK 处理消息回执消息包
