@@ -13,3 +13,4 @@
 
 pb编译命令
 protoc --go_out=. public/proto/protocol.proto
+ protoc --go_out ../pb/ message.proto 
