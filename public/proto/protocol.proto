@@ -10,28 +10,21 @@ message SignIn {
 
 // 设备登录回执
 message SignInACK {
-    int32 code = 1; // 返回码
-    string message = 2; // 描述
+    int32 err_code = 1; // 错误码
+    string err_info = 2; // 错误信息
 }
 
 // 同步消息触发
 message SyncTrigger {
-    int64 sync_sequence = 1; // 已经同步的序列号
-    repeated GroupSyncSequence GroupSyncSequence = 2; // 超大群采用读扩散时的同步序列号
-
+    int64 sync_sequence = 1; // 客户端已经同步的序列号
 }
 
-message GroupSyncSequence {
-    int64 group_id = 1; // 群组id
-    int64 sync_sequence = 2; // 同步序列号
-}
-
-// 消息发送 todo 增加@某人
+// 消息发送
 message MessageSend {
     int32 receiver_type = 1; // 接收者类型，1：user;2:group
     int64 receiver_id = 2; // 用户id或者群组id
-    int32 type = 3; // 消息类型，1：文字；2：语音；3：图片;4:文件
-    string content = 4; // 消息内容
+    repeated int64 warn_user_ids = 3; // 需要@的用户id
+    repeated MessageBody message_body = 4; // 消息体
     int64 send_sequence = 5; // 发送序列号
     int64 send_time = 6; // 消息发送时间戳，精确到毫秒
 }
@@ -44,44 +37,74 @@ message MessageBody {
 
 // 消息类型
 enum MessageType {
-    Defalut = 0; // 占位，无意义
-    Text = 1; // 文本
-    Face = 2; // 表情
-    Voice = 3; // 声音
-    Image = 4; // 图片
-    File = 5; // 文件
-    Location = 6; // 定位
-    custom = 7; // 自定义
+    DEFALUT = 0; // 占位，无意义
+    TEXT = 1; // 文本
+    FACE = 2; // 表情
+    VOICE = 3; // 声音
+    IMAGE = 4; // 图片
+    FILE = 5; // 文件
+    LOCATION = 6; // 定位
+    CUSTOM = 7; // 自定义
 }
 
 // 消息内容
 message MessageContent {
-    string text = 1; // 文本消息文本内容
+    oneof content {
+        Text text = 1; // 文本
+        Voice voice = 2; // 语音消息
+        Face face = 3; // 表情
+        Image image = 4; // 图片
+        File file = 5; // 文件
+        Location location = 6; // 地理位置
+        Custom custom = 7; // 自定义消息类型数据
+    }
+}
 
-    string voice_uuid = 2;
-    int32 voice_size = 3; // 语音包大小
-    int32 voice_duration = 4; // 语音时长
-    string voice_url = 5; // 语音文件URL
+message Text {
+    string text = 1; // 文本消息内容
+}
 
-    int64 face_id = 6; // 表情id
+message Face {
+    int64 face_id = 1;
+    string face_url = 2;
+}
 
-    int32 image_width = 7; // 图片宽度
-    int32 image_height = 8; // 图片长度
-    string image_url = 9; // 图片URL
-    string image_thumbnail_url = 10; // 图片缩略图url
+message Voice {
+    string id = 1; // 语音包id
+    int32 size = 2; // 语音包大小
+    int32 duration = 3; // 语音时长
+    string url = 4; // 语音文件URL
+}
 
-    int64 file_id = 11; // 文件id
-    string file_name = 12; // 文件名
-    int64 file_size = 13; // 文件大小
-    string file_url = 14; // 文件url
+message Image {
+    string id = 1; // 图片id
+    int32 width = 2; // 图片宽度
+    int32 height = 3; // 图片长度
+    string url = 4; // 图片URL
+    string thumbnail_url = 5; // 图片缩略图url
+}
 
-    string data = 15; // 自定义消息类型数据
+message File {
+    int64 id = 12; // 文件id
+    string name = 13; // 文件名
+    int64 size = 14; // 文件大小
+    string url = 15; // 文件url
+}
+
+message Location {
+    string desc = 1; // 描述
+    double latitude = 2; // 经度
+    double longitude = 3; // 纬度
+}
+
+message Custom {
+    string data = 1; // 自定义数据
 }
 
 // 消息发送回执
 message MessageSendACK {
     int64 send_sequence = 1; // 序列号
-    int32 code = 2; // 消息发送状态
+    int32 err_code = 2; // 错误码
     string err_info = 3; // 错误信息
 }
 

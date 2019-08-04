@@ -21,7 +21,7 @@ func (DeviceController) Regist(c *context) {
 	}
 
 	if device.Type == 0 || device.Brand == "" || device.Model == "" ||
-		device.SystemVersion == "" || device.APPVersion == "" {
+		device.SystemVersion == "" || device.SDKVersion == "" {
 		c.response(nil, imerror.LErrBadRequest)
 		return
 	}

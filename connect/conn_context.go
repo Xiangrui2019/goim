@@ -97,8 +97,9 @@ func (c *ConnContext) HandleConnect() {
 
 // HandlePackage 处理消息包
 func (c *ConnContext) HandlePackage(pack *Package) {
-	// 未登录拦截
+	// 对未登录的用户进行拦截
 	if pack.Code != CodeSignIn && c.IsSignIn == false {
+		// 应该告诉用户没有登录
 		c.Release()
 		return
 	}

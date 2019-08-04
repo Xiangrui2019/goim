@@ -23,7 +23,7 @@ func (*groupDao) Get(ctx *imctx.Context, id int) (*model.Group, error) {
 }
 
 // Insert 插入一条群组
-func (*groupDao) Add(ctx *imctx.Context, name string) (int64, error) {
+func (*groupDao) Add(ctx *imctx.Context, appId int64, groupId int64, name string) (int64, error) {
 	result, err := ctx.Session.Exec("insert into `group`(name) value(?)", name)
 	if err != nil {
 		logger.Sugar.Error(err)
