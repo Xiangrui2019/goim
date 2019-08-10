@@ -1,28 +1,31 @@
 package service
 
 import (
-	"database/sql"
-	"goim/logic/dao"
+	"goim/logic/cache"
 	"goim/public/imctx"
 	"goim/public/imerror"
+	"goim/public/logger"
 )
 
 type authService struct{}
 
 var AuthService = new(authService)
 
-func (*authService) Auth(ctx *imctx.Context, deviceId int64, token string) (int64, error) {
-	device, err := dao.DeviceDao.Get(ctx, deviceId)
-	if err == sql.ErrNoRows {
-		return 0, imerror.LErrDeviceIdOrToken
-	}
+// Auth 验证用户是否登录
+func (*authService) Auth(ctx *imctx.Context, appId, deviceId int64, token string) (int64, error) {
+	userId, ctoken, err := cache.DeviceTokenCache.Get(ctx, appId, deviceId)
 	if err != nil {
+		logger.Sugar.Error(err)
 		return 0, err
 	}
 
-	if token != device.Token {
+	if err == nil {
+		return 0, err
+	}
+
+	if token != ctoken {
 		return 0, imerror.LErrDeviceIdOrToken
 	}
 
-	return device.UserId, nil
+	return userId, nil
 }

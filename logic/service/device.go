@@ -36,13 +36,7 @@ func (*deviceService) Regist(ctx *imctx.Context, device model.Device) (int64, st
 		return 0, "", err
 	}
 
-	err = dao.DeviceSendSequenceDao.Add(ctx, id, 0)
-	if err != nil {
-		logger.Sugar.Error(err)
-		return 0, "", err
-	}
-
-	err = dao.DeviceSyncSequenceDao.Add(ctx, id, 0)
+	err = dao.SyncSequenceDao.Add(ctx, device.AppId, device.Id, 0)
 	if err != nil {
 		logger.Sugar.Error(err)
 		return 0, "", err

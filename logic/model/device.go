@@ -2,6 +2,11 @@ package model
 
 import "time"
 
+const (
+	DeviceOnLine  = 1 // 设备在线
+	DeviceOffLine = 0 // 设备离线
+)
+
 // Device 设备
 type Device struct {
 	Id            int64     `json:"id"`             // 设备id
@@ -17,4 +22,9 @@ type Device struct {
 	Status        int       `json:"state"`          // 在线状态，0：不在线；1：在线
 	CreateTime    time.Time `json:"create_time"`    // 创建时间
 	UpdateTime    time.Time `json:"update_time"`    // 更新时间
+}
+
+type DeviceToken struct {
+	UserId int64
+	Token  string
 }

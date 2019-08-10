@@ -1,7 +1,7 @@
 package service
 
 import (
-	"database/sql"
+	"goim/logic/cache"
 	"goim/logic/dao"
 	"goim/logic/model"
 	"goim/public/imctx"
@@ -13,122 +13,118 @@ type userService struct{}
 
 var UserService = new(userService)
 
-// Regist 注册
-func (*userService) Regist(ctx *imctx.Context, deviceId int64, regist model.UserRegist) (*model.SignInResp, error) {
+// AddUser 添加用户（将业务账号导入IM系统账户）
+//1.添加用户，2.添加用户消息序列号
+func (*userService) AddUser(ctx *imctx.Context, deviceId int64, user model.User) error {
 	err := ctx.Session.Begin()
 	if err != nil {
 		logger.Sugar.Error(err)
-		return nil, err
+		return err
 	}
-	defer ctx.Session.Rollback()
+	defer func() {
+		err = ctx.Session.Rollback()
+		if err != nil {
+			logger.Sugar.Error(err)
+		}
+	}()
 
-	// 添加用户
-	user := model.User{
-		Number:   regist.Number,
-		Nickname: regist.Nickname,
-		Sex:      regist.Sex,
-		Avatar:   regist.Avatar,
-		Password: regist.Password,
-	}
-	userId, err := dao.UserDao.Add(ctx, user)
+	affected, err := dao.UserDao.Add(ctx, user)
 	if err != nil {
 		logger.Sugar.Error(err)
-		return nil, err
+		return err
 	}
-	if userId == 0 {
-		return nil, imerror.LErrNumberUsed
+	if affected == 0 {
+		return imerror.LErrNumberUsed
 	}
 
-	err = dao.UserSequenceDao.Add(ctx, userId, 0)
+	err = dao.SequenceDao.Add(ctx, user.AppId, user.UserId, 0)
 	if err != nil {
 		logger.Sugar.Error(err)
-		return nil, err
-	}
-
-	err = dao.DeviceDao.UpdateUserId(ctx, deviceId, userId)
-	if err != nil {
-		logger.Sugar.Error(err)
-		return nil, err
-	}
-
-	dao.DeviceSendSequenceDao.UpdateSendSequence(ctx, deviceId, 0)
-	if err != nil {
-		logger.Sugar.Error(err)
-		return nil, err
-	}
-	dao.DeviceSyncSequenceDao.UpdateSyncSequence(ctx, deviceId, 0)
-	if err != nil {
-		logger.Sugar.Error(err)
-		return nil, err
+		return err
 	}
 
 	err = ctx.Session.Commit()
 	if err != nil {
 		logger.Sugar.Error(err)
-		return nil, err
+		return err
 	}
 
-	return &model.SignInResp{
-		SendSequence: 0,
-		SyncSequence: 0,
-	}, nil
+	return nil
 }
 
 // SignIn 登录
-func (*userService) SignIn(ctx *imctx.Context, deviceId int64, number string, password string) (*model.SignInResp, error) {
+func (*userService) SignIn(ctx *imctx.Context, appId int64, deviceId int64, token string, userId int64, secretKey string) error {
 	err := ctx.Session.Begin()
 	if err != nil {
 		logger.Sugar.Error(err)
-		return nil, err
+		return err
 	}
-	defer ctx.Session.Rollback()
-	// 设备验证
+	defer func() {
+		err = ctx.Session.Rollback()
+		if err != nil {
+			logger.Sugar.Error(err)
+		}
+	}()
 
 	// 用户验证
-	user, err := dao.UserDao.GetByNumber(ctx, number)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, imerror.LErrNameOrPassword
-		}
-		logger.Sugar.Error(err)
-		return nil, err
-	}
-	if password != user.Password {
-		return nil, imerror.LErrNameOrPassword
+	if !VerifySecretKey(appId, userId, secretKey) {
+		return imerror.LErrSecretKey
 	}
 
-	err = dao.DeviceDao.UpdateUserId(ctx, deviceId, user.Id)
+	// 设备验证
+	device, err := dao.DeviceDao.Get(ctx, appId, deviceId)
 	if err != nil {
 		logger.Sugar.Error(err)
-		return nil, err
+		return err
 	}
 
-	err = dao.DeviceSendSequenceDao.UpdateSendSequence(ctx, deviceId, 0)
-	if err != nil {
-		logger.Sugar.Error(err)
-		return nil, err
+	if device == nil {
+		return imerror.LErrDeviceNotFound
 	}
 
-	maxSyncSequence, err := dao.DeviceSyncSequenceDao.GetMaxSyncSequenceByUserId(ctx, user.Id)
+	if device.Token != token {
+		return imerror.LErrToken
+	}
+
+	user, err := dao.UserDao.Get(ctx, appId, userId)
 	if err != nil {
 		logger.Sugar.Error(err)
-		return nil, err
+		return err
+	}
+
+	if user == nil {
+		return imerror.LErrUserNotFound
+	}
+
+	err = dao.DeviceDao.UpdateUserId(ctx, appId, deviceId, userId)
+	if err != nil {
+		logger.Sugar.Error(err)
+		return err
+	}
+
+	err = cache.DeviceTokenCache.Set(ctx, appId, deviceId, userId, token)
+	if err != nil {
+		logger.Sugar.Error(err)
+		return err
 	}
 
 	err = ctx.Session.Commit()
 	if err != nil {
 		logger.Sugar.Error(err)
-		return nil, err
+		return err
 	}
-	return &model.SignInResp{
-		SendSequence: 0,
-		SyncSequence: maxSyncSequence,
-	}, nil
+
+	return nil
+}
+
+// VerifySecretKey 对用户秘钥进行校验
+func VerifySecretKey(appid int64, userId int64, secretKey string) bool {
+	return true
 }
 
 // Get 获取用户信息
-func (*userService) Get(ctx *imctx.Context, userId int64) (*model.User, error) {
-	user, err := dao.UserDao.Get(ctx, userId)
+func (*userService) Get(ctx *imctx.Context, appId, userId int64) (*model.User, error) {
+	user, err := dao.UserDao.Get(ctx, appId, userId)
 	if err != nil {
 		logger.Sugar.Error(err)
 		return nil, err

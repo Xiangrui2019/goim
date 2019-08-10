@@ -12,17 +12,19 @@ type User struct {
 	Nickname   string    `json:"nickname"` // 昵称
 	Sex        int       `json:"sex"`      // 性别，1:男；2:女
 	AvatarUrl  string    `json:"avatar"`   // 用户头像
+	Extra      string    `json:"extra"`    // 附加属性
 	CreateTime time.Time `json:"-"`        // 创建时间
 	UpdateTime time.Time `json:"-"`        // 更新时间
 }
 
 // UserRegist 用户注册
-type UserRegist struct {
-	Number   string `json:"number"`   // 手机号
-	Nickname string `json:"nickname"` // 昵称
-	Sex      int    `json:"sex"`      // 性别，1:男；2:女
-	Avatar   string `json:"avatar"`   // 用户头像
-	Password string `json:"password"` // 密码
+type AddUser struct {
+	AppId     int64  `json:"app_id"`   // app_id
+	UserId    int64  `json:"user_id"`  // 用户id
+	Nickname  string `json:"nickname"` // 昵称
+	Sex       int    `json:"sex"`      // 性别，1:男；2:女
+	AvatarUrl string `json:"avatar"`   // 用户头像
+	Extra     string `json:"extra"`    // 附加属性
 }
 
 // SignIn 登录结构体

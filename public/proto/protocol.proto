@@ -10,8 +10,8 @@ message SignIn {
 
 // 设备登录回执
 message SignInACK {
-    int32 err_code = 1; // 错误码
-    string err_info = 2; // 错误信息
+    int32 code = 1; // 错误码
+    string message = 2; // 错误信息
 }
 
 // 同步消息触发
@@ -19,7 +19,7 @@ message SyncTrigger {
     int64 sync_sequence = 1; // 客户端已经同步的序列号
 }
 
-// 消息发送
+// 消息发送,todo 添加需要持久化的指令，使用场景：1：添加好友，2：申请加群，业务系统通知
 message MessageSend {
     int32 receiver_type = 1; // 接收者类型，1：user;2:group
     int64 receiver_id = 2; // 用户id或者群组id
@@ -44,7 +44,7 @@ enum MessageType {
     IMAGE = 4; // 图片
     FILE = 5; // 文件
     LOCATION = 6; // 定位
-    CUSTOM = 7; // 自定义
+    CUSTOM = 8; // 自定义
 }
 
 // 消息内容
@@ -103,9 +103,9 @@ message Custom {
 
 // 消息发送回执
 message MessageSendACK {
-    int64 send_sequence = 1; // 序列号
-    int32 err_code = 2; // 错误码
-    string err_info = 3; // 错误信息
+    int32 code = 1; // 错误码
+    string message = 2; // 错误信息
+    int64 send_sequence = 3; // 序列号
 }
 
 // 消息投递
@@ -117,14 +117,20 @@ message Message {
 // 单条消息投递
 message MessageItem {
     int64 message_id = 1; //消息id
-    int32 sender_type = 2; // 发送者类型
+    int32 sender_type = 2; // 发送者类型，1：用户，2：系统
     int64 sender_id = 3; // 发送者id
     int64 sender_device_id = 4; // 发送者设备id
     int32 receiver_type = 5; // 接收者类型，1：user;2:group
     int64 receiver_id = 6; // 用户id或者群组id
     repeated MessageBody message_body = 7; // 消息体
-    int64 sync_sequence = 8; // 同步序列号
-    int64 send_time = 9; // 消息发送时间戳，精确到毫秒
+    Command command = 8;
+    int64 sync_sequence = 9; // 同步序列号
+    int64 send_time = 10; // 消息发送时间戳，精确到毫秒
+}
+
+message Command {
+    int64 code = 1; // 指令码
+    bytes data = 2; // 数据内容
 }
 
 // 投递消息回执
