@@ -1,6 +1,7 @@
 package cache
 
 import (
+	"errors"
 	"goim/logic/db"
 	"goim/logic/model"
 	"goim/public/imctx"
@@ -12,12 +13,11 @@ import (
 )
 
 const (
-	groupUserKey  = "group_user:"
-	groupUserExp  = 2 * time.Hour
-	groupUserSign = "-1" // 群组成员标记，如果存在，表示群组的hash缓存没有过期
+	groupUserKey = "group_user:"
+	groupUserExp = 2 * time.Hour
 )
 
-var ErrKeyExp = "err key expire"
+var ErrResult = errors.New("error redis result")
 
 type groupUserCache struct{}
 
@@ -27,8 +27,8 @@ func (*groupUserCache) Key(appId, groupId int64) string {
 	return groupUserKey + strconv.FormatInt(appId, 10) + strconv.FormatInt(groupId, 10)
 }
 
-// 保存用户信息
-func (c *groupUserCache) MSet(ctx *imctx.Context, appId, groupId int64, userInfos []model.GroupUser) error {
+// 保存群组用户信息
+func (c *groupUserCache) Set(ctx *imctx.Context, appId, groupId int64, userInfos []model.GroupUser) error {
 	users := make(map[string]interface{}, len(userInfos)+1)
 	for _, userInfo := range userInfos {
 		bytes, err := jsoniter.Marshal(userInfo)
@@ -39,7 +39,6 @@ func (c *groupUserCache) MSet(ctx *imctx.Context, appId, groupId int64, userInfo
 
 		users[strconv.FormatInt(userInfo.UserId, 10)] = bytes
 	}
-	users["-1"] = []byte{}
 
 	key := c.Key(appId, groupId)
 	err := db.RedisCli.HMSet(key, users).Err()
@@ -57,25 +56,5 @@ func (c *groupUserCache) MSet(ctx *imctx.Context, appId, groupId int64, userInfo
 }
 
 func (c *groupUserCache) Get(ctx *imctx.Context, appId, groupId, userId int64) (*model.GroupUser, error) {
-	values, err := db.RedisCli.HMGet(c.Key(appId, groupId), groupUserSign, strconv.FormatInt(userId, 10)).Result()
-	if err != nil {
-		logger.Sugar.Error(err)
-		return nil, err
-	}
-
-	if values[0] == nil {
-		return nil, nil
-	}
-
-	if values[1] == nil {
-		return nil, nil
-	}
-
-	var groupUser = new(model.GroupUser)
-	err = jsoniter.Unmarshal(values[2].([]byte), groupUser)
-	if err != nil {
-		logger.Sugar.Error(err)
-		return nil, err
-	}
-
+	return nil, nil
 }
