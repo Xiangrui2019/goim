@@ -114,7 +114,7 @@ message Message {
     repeated MessageItem messages = 2; // 消息列表
 }
 
-// 单条消息投递
+// 单条消息投递 todo 1.业务推送，2.指令，3：消息
 message MessageItem {
     int64 message_id = 1; //消息id
     int32 sender_type = 2; // 发送者类型，1：用户，2：系统

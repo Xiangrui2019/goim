@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/gomodule/redigo/redis"
+	"github.com/go-redis/redis"
 )
 
 const (
@@ -27,11 +27,11 @@ func (c *friendCache) Key(appId, userId, friendId int64) string {
 // Get 获取朋友信息
 func (c *friendCache) Get(ctx *imctx.Context, appId, userId, friendId int64) (friend *model.Friend, err error) {
 	err = get(c.Key(appId, userId, friendId), friend)
-	if err != nil && err != redis.ErrNil {
+	if err != nil && err != redis.Nil {
 		logger.Sugar.Error(err)
 		return
 	}
-	if err == redis.ErrNil {
+	if err == redis.Nil {
 		return nil, nil
 	}
 	return
