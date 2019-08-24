@@ -1,3 +1,19 @@
+/*
+ Navicat Premium Data Transfer
+
+ Source Server         : local
+ Source Server Type    : MySQL
+ Source Server Version : 80016
+ Source Host           : localhost:3306
+ Source Schema         : goim
+
+ Target Server Type    : MySQL
+ Target Server Version : 80016
+ File Encoding         : 65001
+
+ Date: 24/08/2019 20:37:23
+*/
+
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
@@ -22,7 +38,7 @@ CREATE TABLE `device` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_app_id_device_id` (`app_id`,`device_id`) USING BTREE,
   KEY `idx_app_id_user_id` (`app_id`,`user_id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='设备';
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='设备';
 
 -- ----------------------------
 -- Table structure for friend
@@ -39,7 +55,7 @@ CREATE TABLE `friend` (
   `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_app_id_user_id_friend_id` (`app_id`,`user_id`,`friend_id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='好友关系';
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='好友关系';
 
 -- ----------------------------
 -- Table structure for group
@@ -51,14 +67,14 @@ CREATE TABLE `group` (
   `group_id` bigint(20) NOT NULL COMMENT '群组id',
   `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL COMMENT '群组名称',
   `introduction` varchar(255) COLLATE utf8mb4_bin NOT NULL COMMENT '群组简介',
-  `user_num` int(11) NOT NULL COMMENT '群组人数',
+  `user_num` int(11) NOT NULL DEFAULT '0' COMMENT '群组人数',
   `type` tinyint(4) NOT NULL COMMENT '群组类型，1：小群；2：大群',
   `extra` varchar(1024) COLLATE utf8mb4_bin NOT NULL COMMENT '附加属性',
   `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_app_id_group_id` (`app_id`,`group_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='群组';
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='群组';
 
 -- ----------------------------
 -- Table structure for group_user
@@ -76,7 +92,7 @@ CREATE TABLE `group_user` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_app_id_group_id_user_id` (`app_id`,`group_id`,`user_id`) USING BTREE,
   KEY `idx_app_id_user_id` (`app_id`,`user_id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='群组成员关系';
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='群组成员关系';
 
 -- ----------------------------
 -- Table structure for sequence
@@ -126,13 +142,6 @@ CREATE TABLE `uid` (
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='分布式自增主键';
 
 -- ----------------------------
--- Records of uid
--- ----------------------------
-BEGIN;
-INSERT INTO `uid` VALUES (1, 'message_id', 0, 1000, '消息id', '2018-11-11 09:14:09', '2018-11-12 18:30:41');
-COMMIT;
-
--- ----------------------------
 -- Table structure for user
 -- ----------------------------
 DROP TABLE IF EXISTS `user`;
@@ -148,6 +157,6 @@ CREATE TABLE `user` (
   `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_app_id_user_id` (`app_id`,`user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='用户';
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='用户';
 
 SET FOREIGN_KEY_CHECKS = 1;

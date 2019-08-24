@@ -1,6 +1,7 @@
 package dao
 
 import (
+	"database/sql"
 	"goim/logic/model"
 	"goim/public/imctx"
 	"goim/public/logger"
@@ -19,9 +20,13 @@ func (*groupDao) Get(ctx *imctx.Context, appId, groupId int64) (*model.Group, er
 		GroupId: groupId,
 	}
 	err := row.Scan(&group.Name, &group.Introduction, &group.UserNum, &group.Type, &group.Extra, &group.CreateTime, &group.UpdateTime)
-	if err != nil {
+	if err != nil && err != sql.ErrNoRows {
 		logger.Sugar.Error(err)
 		return nil, err
+	}
+
+	if err == sql.ErrNoRows {
+		return nil, nil
 	}
 	return &group, nil
 }
@@ -40,4 +45,28 @@ func (*groupDao) Add(ctx *imctx.Context, group model.Group) (int64, error) {
 		return 0, err
 	}
 	return num, nil
+}
+
+// Update 更新群组信息
+func (*groupDao) Update(ctx *imctx.Context, appId, groupId int64, name, introduction, extra string) error {
+	_, err := ctx.Session.Exec("update `group` set name = ?,introduction = ?,extra = ? where app_id = ? and group_id = ?",
+		name, introduction, extra, appId, groupId)
+	if err != nil {
+		logger.Sugar.Error(err)
+		return err
+	}
+
+	return nil
+}
+
+// AddUserNum 更新群组信息
+func (*groupDao) AddUserNum(ctx *imctx.Context, appId, groupId int64, userNum int) error {
+	_, err := ctx.Session.Exec("update `group` set user_num = user_num + ? where app_id = ? and group_id = ?",
+		userNum, appId, groupId)
+	if err != nil {
+		logger.Sugar.Error(err)
+		return err
+	}
+
+	return nil
 }

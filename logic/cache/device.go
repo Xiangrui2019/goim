@@ -23,6 +23,28 @@ func (c *deviceCache) Key(appId, userId int64) string {
 	return DeviceKey + strconv.FormatInt(appId, 10) + ":" + strconv.FormatInt(userId, 10)
 }
 
+// GetAll 获取指定用户的所有在线设备
+func (c *deviceCache) GetAll(appId, userId int64) ([]model.Device, error) {
+	result, err := getHashAll(c.Key(appId, userId))
+	if err != nil {
+		logger.Sugar.Error(err)
+		return nil, err
+	}
+
+	devices := make([]model.Device, 0, len(result))
+
+	for _, v := range result {
+		var device model.Device
+		err = jsoniter.Unmarshal(v, &device)
+		if err != nil {
+			logger.Sugar.Error(err)
+			return nil, err
+		}
+		devices = append(devices, device)
+	}
+	return devices, nil
+}
+
 // SetAll 将指定用户的所有在线设备存入缓存
 func (c *deviceCache) SetAll(appId, userId, deviceId int64, devices []model.Device) error {
 	deviceMap := make(map[string]interface{}, len(devices)+1)
@@ -49,28 +71,6 @@ func (c *deviceCache) SetAll(appId, userId, deviceId int64, devices []model.Devi
 		return err
 	}
 	return nil
-}
-
-// GetAll 获取指定用户的所有在线设备
-func (c *deviceCache) GetAll(appId, userId int64) ([]model.Device, error) {
-	result, err := getHashAll(c.Key(appId, userId))
-	if err != nil {
-		logger.Sugar.Error(err)
-		return nil, err
-	}
-
-	devices := make([]model.Device, 0, len(result))
-
-	for _, v := range result {
-		var device model.Device
-		err = jsoniter.Unmarshal(v, &device)
-		if err != nil {
-			logger.Sugar.Error(err)
-			return nil, err
-		}
-		devices = append(devices, device)
-	}
-	return devices, nil
 }
 
 // Get 获取某一个用户的在线设备

@@ -20,7 +20,7 @@ func (*friendDao) Get(ctx *imctx.Context, appId, userId, friendId int64) (*model
 	}
 	row := ctx.Session.QueryRow(`select id,label,extra,create_time,update_time 
 		from friend where app_id = ? and user_id = ? and friend_id = ?`,
-		userId, friendId)
+		appId, userId, friendId)
 	err := row.Scan(&friend.Id, &friend.Label, &friend.Extra, &friend.CreateTime, &friend.UpdateTime)
 	if err != nil && err != sql.ErrNoRows {
 		logger.Sugar.Error(err)
@@ -55,7 +55,7 @@ func (*friendDao) Delete(ctx *imctx.Context, appId, userId, friendId int64) erro
 
 // ListFriends 获取用户的朋友列表
 func (*friendDao) ListUserFriend(ctx *imctx.Context, appId, userId int64) ([]model.UserFriend, error) {
-	rows, err := ctx.Session.Query(`select f.label,f.extra,u.user_id,u.nickname,u.sex,u.avatar_url,u.extra,create_time,update_time 
+	rows, err := ctx.Session.Query(`select f.label,f.extra,u.user_id,u.nickname,u.sex,u.avatar_url,u.extra,u.create_time,u.update_time 
 		from friend f left join user u on f.friend_id = u.user_id where f.app_id = ? and f.user_id = ?`, appId, userId)
 	if err != nil {
 		logger.Sugar.Error(err)
@@ -65,7 +65,8 @@ func (*friendDao) ListUserFriend(ctx *imctx.Context, appId, userId int64) ([]mod
 	friends := make([]model.UserFriend, 0, 5)
 	for rows.Next() {
 		var friend model.UserFriend
-		err := rows.Scan(&friend.Label, &friend.FriendExtra, &friend.UserId, &friend.Nickname, &friend.Sex, &friend.AvatarUrl, &friend.UserExtra, &friend.CreateTime, &friend.UpdateTime)
+		err := rows.Scan(&friend.Label, &friend.FriendExtra, &friend.UserId, &friend.Nickname, &friend.Sex, &friend.AvatarUrl,
+			&friend.UserExtra, &friend.CreateTime, &friend.UpdateTime)
 		if err != nil {
 			logger.Sugar.Error(err)
 			return nil, err

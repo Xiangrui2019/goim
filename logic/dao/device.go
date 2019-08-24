@@ -14,8 +14,8 @@ var DeviceDao = new(deviceDao)
 // Insert 插入一条设备信息
 func (*deviceDao) Add(ctx *imctx.Context, device model.Device) (int64, error) {
 	result, err := ctx.Session.Exec(`insert into device(app_id,device_id,user_id,token,type,brand,model,system_version,sdk_version,status) 
-		values(?,?,?,?,?,?,?,?.?,?)`,
-		device.AppId, device.DeviceId, device.UserId, device.Token, device.Type, device.Brand, device.Model, device.SystemVersion, device.SDKVersion)
+		values(?,?,?,?,?,?,?,?,?,?)`,
+		device.AppId, device.DeviceId, device.UserId, device.Token, device.Type, device.Brand, device.Model, device.SystemVersion, device.SDKVersion, device.Status)
 	if err != nil {
 		logger.Sugar.Error(err)
 		return 0, err
@@ -52,7 +52,7 @@ func (*deviceDao) Get(ctx *imctx.Context, appId, deviceId int64) (*model.Device,
 }
 
 // ListUserOnline 查询用户所有的在线设备
-func (*deviceDao) ListOnlineByUserId(ctx *imctx.Context, appId, userId int64) ([]*model.Device, error) {
+func (*deviceDao) ListOnlineByUserId(ctx *imctx.Context, appId, userId int64) ([]model.Device, error) {
 	rows, err := ctx.Session.Query("select user_id,token,type,brand,model,system_version,sdk_version,status,create_time,update_time from device where app_id = ? and user_id = ? and status = ?",
 		appId, userId, model.DeviceOnLine)
 	if err != nil {
@@ -60,7 +60,7 @@ func (*deviceDao) ListOnlineByUserId(ctx *imctx.Context, appId, userId int64) ([
 		return nil, err
 	}
 
-	devices := make([]*model.Device, 0, 5)
+	devices := make([]model.Device, 0, 5)
 	for rows.Next() {
 		device := new(model.Device)
 		err = rows.Scan(&device.UserId, &device.Token, &device.Type, &device.Brand, &device.Model, &device.SystemVersion, &device.SDKVersion,
@@ -69,7 +69,7 @@ func (*deviceDao) ListOnlineByUserId(ctx *imctx.Context, appId, userId int64) ([
 			logger.Sugar.Error(err)
 			return nil, err
 		}
-		devices = append(devices, device)
+		devices = append(devices, *device)
 	}
 	return devices, nil
 }
@@ -95,7 +95,7 @@ func (*deviceDao) UpdateStatus(ctx *imctx.Context, appId, deviceId int64, status
 }
 
 // Upgrade 升级设备
-func (*deviceDao) Upgrade(ctx *imctx.Context, appId, deviceId int64, systemVersion, sdkVersion int) error {
+func (*deviceDao) Upgrade(ctx *imctx.Context, appId, deviceId int64, systemVersion, sdkVersion string) error {
 	_, err := ctx.Session.Exec("update device set system_version = ?,sdk_version = ? where app_id = ? and id = ? ", systemVersion, sdkVersion, appId, deviceId)
 	if err != nil {
 		logger.Sugar.Error(err)
