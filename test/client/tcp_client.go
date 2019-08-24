@@ -3,12 +3,11 @@ package client
 import (
 	"goim/connect"
 	"goim/public/pb"
+	"goim/public/util"
 	"net"
 	"time"
 
 	"fmt"
-
-	"goim/public/lib"
 
 	"goim/public/transfer"
 
@@ -157,7 +156,7 @@ func (c *TcpClient) HandlePackage(pack connect.Package) error {
 		ack := pb.MessageACK{
 			MessageId:    message.Messages[len(message.Messages)-1].MessageId,
 			SyncSequence: message.Messages[len(message.Messages)-1].SyncSequence,
-			ReceiveTime:  lib.UnixTime(time.Now()),
+			ReceiveTime:  util.UnixTime(time.Now()),
 		}
 		ackBytes, err := proto.Marshal(&ack)
 		if err != nil {
@@ -184,7 +183,7 @@ func (c *TcpClient) SendMessage() {
 	send.Type = 1
 	c.SendSequence++
 	send.SendSequence = c.SendSequence
-	send.SendTime = lib.UnixTime(time.Now())
+	send.SendTime = util.UnixTime(time.Now())
 	bytes, err := proto.Marshal(&send)
 	if err != nil {
 		fmt.Println(err)

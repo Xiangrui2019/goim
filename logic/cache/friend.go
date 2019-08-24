@@ -12,8 +12,8 @@ import (
 )
 
 const (
-	friendKey    = "friend:"
-	friendExpire = 2 * time.Hour
+	FriendKey    = "friend:"
+	FriendExpire = 2 * time.Hour
 )
 
 type friendCache struct{}
@@ -21,7 +21,7 @@ type friendCache struct{}
 var FriendCache = new(friendCache)
 
 func (c *friendCache) Key(appId, userId, friendId int64) string {
-	return friendKey + strconv.FormatInt(appId, 10) + ":" + strconv.FormatInt(userId, 10) + ":" + strconv.FormatInt(friendId, 10)
+	return FriendKey + strconv.FormatInt(appId, 10) + ":" + strconv.FormatInt(userId, 10) + ":" + strconv.FormatInt(friendId, 10)
 }
 
 // Get 获取朋友信息
@@ -39,7 +39,7 @@ func (c *friendCache) Get(ctx *imctx.Context, appId, userId, friendId int64) (fr
 
 // Set 设置朋友信息
 func (c *friendCache) Set(ctx *imctx.Context, friend *model.Friend) error {
-	err := set(c.Key(friend.AppId, friend.UserId, friend.FriendId), friend, friendExpire)
+	err := set(c.Key(friend.AppId, friend.UserId, friend.FriendId), friend, FriendExpire)
 	if err != nil {
 		logger.Sugar.Error(err)
 	}

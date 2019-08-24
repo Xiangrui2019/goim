@@ -1,4 +1,4 @@
-package lib
+package util
 
 import "time"
 
@@ -7,8 +7,8 @@ func FormatTime(time time.Time) string {
 	return time.Format("2006-01-02 15:04:05")
 }
 
-// UnFormatTime 将时间字符串转为Time
-func UnFormatTime(str string) (time.Time, error) {
+// ParseTime 将时间字符串转为Time
+func ParseTime(str string) (time.Time, error) {
 	return time.Parse("2006-01-02 15:04:05", str)
 }
 

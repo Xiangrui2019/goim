@@ -4,10 +4,10 @@ import (
 	"time"
 
 	"encoding/json"
-	"goim/public/lib"
 	"goim/public/logger"
 	"goim/public/pb"
 	"goim/public/transfer"
+	"goim/public/util"
 
 	"goim/conf"
 
@@ -71,7 +71,7 @@ func HandleMessage(msg *nsq.Message) error {
 		item.Type = int32(v.Type)
 		item.Content = v.Content
 		item.SyncSequence = v.Sequence
-		item.SendTime = lib.UnixTime(v.SendTime)
+		item.SendTime = util.UnixTime(v.SendTime)
 
 		messages = append(messages, item)
 	}

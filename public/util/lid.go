@@ -1,11 +1,11 @@
-package lib
+package util
 
 import (
 	"database/sql"
 	"fmt"
 	"goim/conf"
-	"goim/public/lib/lid"
 	"goim/public/logger"
+	"goim/public/util/lid"
 )
 
 var Lid *lid.Lid

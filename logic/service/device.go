@@ -49,3 +49,34 @@ func (*deviceService) Regist(ctx *imctx.Context, device model.Device) (int64, st
 	}
 	return id, device.Token, nil
 }
+
+// Regist 注册设备
+func (*deviceService) ListByUserId(ctx *imctx.Context, device model.Device) (int64, string, error) {
+	err := ctx.Session.Begin()
+	if err != nil {
+		logger.Sugar.Error(err)
+		return 0, "", err
+	}
+	defer ctx.Session.Rollback()
+
+	UUID := uuid.NewV4()
+	device.Token = UUID.String()
+	id, err := dao.DeviceDao.Add(ctx, device)
+	if err != nil {
+		logger.Sugar.Error(err)
+		return 0, "", err
+	}
+
+	err = dao.SyncSequenceDao.Add(ctx, device.AppId, device.Id, 0)
+	if err != nil {
+		logger.Sugar.Error(err)
+		return 0, "", err
+	}
+
+	err = ctx.Session.Commit()
+	if err != nil {
+		logger.Sugar.Error(err)
+		return 0, "", err
+	}
+	return id, device.Token, nil
+}

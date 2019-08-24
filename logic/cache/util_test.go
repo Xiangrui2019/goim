@@ -9,16 +9,20 @@ type A struct {
 	A int
 }
 
-func TestHset(t *testing.T) {
-	fmt.Println(hset("1", "1", A{A: 1}))
+func TestGetHashAll(t *testing.T) {
+	fmt.Println(getHashAll("2"))
 }
 
-func TestHget(t *testing.T) {
+func TestSetHash(t *testing.T) {
+	fmt.Println(setHash("1", "1", A{A: 1}))
+}
+
+func TestGetHash(t *testing.T) {
 	var a A
-	fmt.Println(hget("1", "1", &a))
+	fmt.Println(getHash("1", "1", &a))
 	fmt.Println(a)
 }
 
-func TestHdel(t *testing.T) {
-	fmt.Println(hdel("1", "1"))
+func TestDelHash(t *testing.T) {
+	fmt.Println(delHash("1", "1"))
 }

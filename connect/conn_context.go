@@ -5,12 +5,11 @@ import (
 	"goim/public/logger"
 	"goim/public/pb"
 	"goim/public/transfer"
+	"goim/public/util"
 	"io"
 	"net"
 	"strings"
 	"time"
-
-	"goim/public/lib"
 
 	"goim/conf"
 
@@ -213,7 +212,7 @@ func (c *ConnContext) HandlePackageMessageSend(pack *Package) {
 		Type:           send.Type,
 		Content:        send.Content,
 		SendSequence:   send.SendSequence,
-		SendTime:       lib.UnunixTime(send.SendTime),
+		SendTime:       util.UnunixTime(send.SendTime),
 	}
 
 	publishMessageSend(transferSend)
@@ -234,7 +233,7 @@ func (c *ConnContext) HandlePackageMessageACK(pack *Package) {
 		DeviceId:     c.DeviceId,
 		UserId:       c.UserId,
 		SyncSequence: ack.SyncSequence,
-		ReceiveTime:  lib.UnunixTime(ack.ReceiveTime),
+		ReceiveTime:  util.UnunixTime(ack.ReceiveTime),
 	}
 
 	publishMessageACK(transferAck)

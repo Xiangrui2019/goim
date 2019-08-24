@@ -49,3 +49,16 @@ func (*userDao) Get(ctx *imctx.Context, appId, userId int64) (*model.User, error
 
 	return &user, err
 }
+
+// Update 更新用户信息
+func (*userDao) Update(ctx *imctx.Context, user model.User) error {
+	_, err := ctx.Session.Exec("update user set nickname = ?,sex = ?,avatar_url = ?,extra = ? where app_id = and user_id = ?",
+		user.Nickname, user.Sex, user.AvatarUrl, user.Extra, user.AppId, user.UserId)
+
+	if err != nil {
+		logger.Sugar.Error(err)
+		return err
+	}
+
+	return nil
+}

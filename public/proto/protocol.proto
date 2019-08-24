@@ -1,6 +1,95 @@
 syntax = "proto3";
 package pb;
 
+/************************************消息体定义开始************************************/
+// 消息体
+message MessageBody {
+    MessageType message_type = 1; // 消息类型
+    MessageContent message_content = 2; // 消息内容
+}
+
+// 消息类型
+enum MessageType {
+    DEFALUT = 0; // 占位，无意义
+    TEXT = 1; // 文本
+    FACE = 2; // 表情
+    VOICE = 3; // 语音消息
+    IMAGE = 4; // 图片
+    FILE = 5; // 文件
+    LOCATION = 6; // 地理位置
+    COMMAND = 7; // 指令推送
+    CUSTOM = 8; // 自定义
+}
+
+// 消息内容，MessageType：1
+message MessageContent {
+    oneof content {
+        Text text = 1; // 文本
+        Face face = 2; // 表情
+        Voice voice = 3; // 语音消息
+        Image image = 4; // 图片
+        File file = 5; // 文件
+        Location location = 6; // 地理位置
+        Command command = 7; // 指令
+        Custom custom = 8; // 自定义消息类型数据
+    }
+}
+
+// 文本消息
+message Text {
+    string text = 1; // 文本消息内容
+}
+
+// 表情消息
+message Face {
+    int64 face_id = 1;
+    string face_url = 2;
+}
+
+// 语音消息
+message Voice {
+    string id = 1; // 语音包id
+    int32 size = 2; // 语音包大小
+    int32 duration = 3; // 语音时长
+    string url = 4; // 语音文件URL
+}
+
+// 图片消息
+message Image {
+    string id = 1; // 图片id
+    int32 width = 2; // 图片宽度
+    int32 height = 3; // 图片长度
+    string url = 4; // 图片URL
+    string thumbnail_url = 5; // 图片缩略图url
+}
+
+// 文件消息
+message File {
+    int64 id = 12; // 文件id
+    string name = 13; // 文件名
+    int64 size = 14; // 文件大小
+    string url = 15; // 文件url
+}
+
+// 地理位置消息
+message Location {
+    string desc = 1; // 描述
+    double latitude = 2; // 经度
+    double longitude = 3; // 纬度
+}
+
+// Command 指令推送，1000以下，IM内部用，1000以上，留给业务用
+message Command {
+    int32 code = 1; // 指令码
+    bytes data = 2; // 数据内容
+}
+
+// 自定义消息
+message Custom {
+    string data = 1; // 自定义数据
+}
+/************************************消息体定义结束************************************/
+
 // 设备登录
 message SignIn {
     int64 device_id = 1; // 设备id
@@ -19,118 +108,60 @@ message SyncTrigger {
     int64 sync_sequence = 1; // 客户端已经同步的序列号
 }
 
-// 消息发送,todo 添加需要持久化的指令，使用场景：1：添加好友，2：申请加群，业务系统通知
+message SyncTriggerACK {
+    repeated MessageItem messages = 2; // 消息列表
+}
+
+enum ReceiverType {
+    UNKNOWN = 0; // 未知
+    USER = 1; // 用户
+    GROUP = 2; // 群组
+}
+
+// 消息发送
 message MessageSend {
-    int32 receiver_type = 1; // 接收者类型，1：user;2:group
+    ReceiverType receiver_type = 1; // 接收者类型
     int64 receiver_id = 2; // 用户id或者群组id
-    repeated int64 warn_user_ids = 3; // 需要@的用户id
+    repeated int64 to_user_ids = 3; // 需要@的用户id列表
     repeated MessageBody message_body = 4; // 消息体
-    int64 send_sequence = 5; // 发送序列号
+    int64 message_id = 5; // 消息id,由客户端生成，对于一个设备而言，message_id是唯一的
     int64 send_time = 6; // 消息发送时间戳，精确到毫秒
-}
-
-// 消息体
-message MessageBody {
-    MessageType message_type = 1; // 消息类型
-    MessageContent message_content = 2; // 消息内容
-}
-
-// 消息类型
-enum MessageType {
-    DEFALUT = 0; // 占位，无意义
-    TEXT = 1; // 文本
-    FACE = 2; // 表情
-    VOICE = 3; // 声音
-    IMAGE = 4; // 图片
-    FILE = 5; // 文件
-    LOCATION = 6; // 定位
-    CUSTOM = 8; // 自定义
-}
-
-// 消息内容
-message MessageContent {
-    oneof content {
-        Text text = 1; // 文本
-        Voice voice = 2; // 语音消息
-        Face face = 3; // 表情
-        Image image = 4; // 图片
-        File file = 5; // 文件
-        Location location = 6; // 地理位置
-        Custom custom = 7; // 自定义消息类型数据
-    }
-}
-
-message Text {
-    string text = 1; // 文本消息内容
-}
-
-message Face {
-    int64 face_id = 1;
-    string face_url = 2;
-}
-
-message Voice {
-    string id = 1; // 语音包id
-    int32 size = 2; // 语音包大小
-    int32 duration = 3; // 语音时长
-    string url = 4; // 语音文件URL
-}
-
-message Image {
-    string id = 1; // 图片id
-    int32 width = 2; // 图片宽度
-    int32 height = 3; // 图片长度
-    string url = 4; // 图片URL
-    string thumbnail_url = 5; // 图片缩略图url
-}
-
-message File {
-    int64 id = 12; // 文件id
-    string name = 13; // 文件名
-    int64 size = 14; // 文件大小
-    string url = 15; // 文件url
-}
-
-message Location {
-    string desc = 1; // 描述
-    double latitude = 2; // 经度
-    double longitude = 3; // 纬度
-}
-
-message Custom {
-    string data = 1; // 自定义数据
 }
 
 // 消息发送回执
 message MessageSendACK {
     int32 code = 1; // 错误码
     string message = 2; // 错误信息
-    int64 send_sequence = 3; // 序列号
+    int64 message_id = 3; // 序列号
 }
 
 // 消息投递
 message Message {
-    int32 type = 1; // 消息投递类型，1：消息同步列表，2：消息发送列表
-    repeated MessageItem messages = 2; // 消息列表
+    MessageItem message = 1; // 消息
 }
 
-// 单条消息投递 todo 1.业务推送，2.指令，3：消息
+// 单条消息投递,todo 通知栏提醒
 message MessageItem {
     int64 message_id = 1; //消息id
     int32 sender_type = 2; // 发送者类型，1：用户，2：系统
     int64 sender_id = 3; // 发送者id
     int64 sender_device_id = 4; // 发送者设备id
-    int32 receiver_type = 5; // 接收者类型，1：user;2:group
-    int64 receiver_id = 6; // 用户id或者群组id
-    repeated MessageBody message_body = 7; // 消息体
-    Command command = 8;
-    int64 sync_sequence = 9; // 同步序列号
-    int64 send_time = 10; // 消息发送时间戳，精确到毫秒
+    SenderInfo send_info = 5; // 当为超大群消息时，会附带用户信息
+    int32 receiver_type = 6; // 接收者类型，1：user;2:group
+    int64 receiver_id = 7; // 用户id或者群组id
+    repeated int64 to_user_ids = 8; // 需要@的用户id列表
+    repeated MessageBody message_body = 9; // 消息体
+    int64 sequence = 10; // 同步序列号
+    int64 send_time = 11; // 消息发送时间戳，精确到毫秒
 }
 
-message Command {
-    int64 code = 1; // 指令码
-    bytes data = 2; // 数据内容
+message SenderInfo {
+    string lable = 1; // 用户在群组的标签
+    string group_user_extra = 2; // 用户在群组的附带信息
+    string nickname = 3; // 用户昵称
+    string avatar_url = 4; // 用户头像url
+    string sex = 5; // 性别
+    string user_extra = 6; // 附加属性
 }
 
 // 投递消息回执

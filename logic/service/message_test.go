@@ -3,8 +3,8 @@ package service
 import (
 	"fmt"
 	"goim/logic/model"
-	"goim/public/lib"
 	"goim/public/logger"
+	"goim/public/util"
 	"testing"
 )
 
@@ -32,6 +32,6 @@ func TestMessageService_ListByUserIdAndSequence(t *testing.T) {
 	}
 	for _, message := range messages {
 		fmt.Println(message)
-		fmt.Println(lib.FormatTime(message.CreateTime))
+		fmt.Println(util.FormatTime(message.CreateTime))
 	}
 }

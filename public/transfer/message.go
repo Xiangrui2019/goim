@@ -1,7 +1,7 @@
 package transfer
 
 import (
-	"goim/public/lib"
+	"goim/public/util"
 	"time"
 )
 
@@ -25,7 +25,7 @@ func (m *Message) GetLog() string {
 		item.Sequence = v.Sequence
 		list = append(list, item)
 	}
-	return lib.JsonMarshal(list)
+	return util.JsonMarshal(list)
 }
 
 type messageLogItem struct {

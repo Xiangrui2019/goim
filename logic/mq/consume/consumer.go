@@ -8,9 +8,9 @@ import (
 	"goim/logic/service"
 	"goim/public/imctx"
 	"goim/public/imerror"
-	"goim/public/lib"
 	"goim/public/logger"
 	"goim/public/transfer"
+	"goim/public/util"
 
 	"time"
 
@@ -106,7 +106,7 @@ func handleMessageSend(msg *nsq.Message) error {
 		return nil
 	}
 
-	send.MessageId = lib.Lid.Get()
+	send.MessageId = util.Lid.Get()
 	ctx := context()
 	logger.Logger.Info("消息发送",
 		zap.Int64("device_id", send.SenderDeviceId),

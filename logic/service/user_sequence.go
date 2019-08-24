@@ -11,25 +11,36 @@ type userRequenceService struct{}
 var UserRequenceService = new(userRequenceService)
 
 // GetNext 获取下一个序列
-func (*userRequenceService) GetNext(ctx *imctx.Context, userId int64) (int64, error) {
+func (*userRequenceService) GetNext(ctx *imctx.Context, appId, userId int64) (int64, error) {
 	err := ctx.Session.Begin()
 	if err != nil {
 		logger.Sugar.Error(err)
 		return 0, err
 	}
-	ctx.Session.Rollback()
+	defer func() {
+		err = ctx.Session.Rollback()
+		if err != nil {
+			logger.Sugar.Error(err)
+			return
+		}
+	}()
 
-	err = dao.UserSequenceDao.Increase(ctx, userId)
+	err = dao.SequenceDao.Increase(ctx, appId, userId)
 	if err != nil {
 		logger.Sugar.Error(err)
 		return 0, err
 	}
 
-	sequence, err := dao.UserSequenceDao.GetSequence(ctx, userId)
+	sequence, err := dao.SequenceDao.GetSequence(ctx, appId, userId)
 	if err != nil {
 		logger.Sugar.Error(err)
 		return 0, err
 	}
 
+	err = ctx.Session.Commit()
+	if err != nil {
+		logger.Sugar.Error(err)
+		return 0, err
+	}
 	return sequence, nil
 }

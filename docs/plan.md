@@ -14,4 +14,10 @@
 
 pb编译命令
 protoc --go_out=. public/proto/protocol.proto
- protoc --go_out ../pb/ message.proto 
+ protoc --go_out ../pb/ message.proto
+ 
+logic 调用 connect层，使用rpc
+
+1.服务发现逻辑
+上线，通知到所有用户
+2. 
