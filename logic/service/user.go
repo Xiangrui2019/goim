@@ -37,7 +37,7 @@ func (*userService) Add(ctx *imctx.Context, deviceId int64, user model.User) err
 		return imerror.LErrNumberUsed
 	}
 
-	err = dao.SequenceDao.Add(ctx, user.AppId, user.UserId, 0)
+	err = dao.UserSeqDao.Add(ctx, user.AppId, user.UserId, 0)
 	if err != nil {
 		logger.Sugar.Error(err)
 		return err
