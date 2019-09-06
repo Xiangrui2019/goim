@@ -147,7 +147,7 @@ func handleMessageSend(msg *nsq.Message) error {
 	if cerror, ok := err.(*imerror.CError); ok {
 		ack.Code = cerror.Code
 	} else {
-		ack.Code = imerror.CErrUnkonw.Code
+		ack.Code = imerror.CErrUnknown.Code
 	}
 	// 消息发送回执
 	produce.PublishMessageSendACK(ack)

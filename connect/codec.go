@@ -74,7 +74,7 @@ func (c *Codec) Decode() (*Package, bool, error) {
 	if err != nil {
 		return nil, false, nil
 	}
-	message := Package{Code: valueType, Content: valueBuf}
+	message := Package{PackageType: valueType, Content: valueBuf}
 	return &message, true, nil
 }
 
@@ -85,8 +85,10 @@ func (c *Codec) Eecode(pack Package, duration time.Duration) error {
 		return ErrOutOfSize
 	}
 
-	binary.BigEndian.PutUint16(c.WriteBuf[0:TypeLen], uint16(pack.Code))
+	binary.BigEndian.PutUint16(c.WriteBuf[0:TypeLen], uint16(pack.PackageType))
 	binary.BigEndian.PutUint16(c.WriteBuf[LenLen:HeadLen], uint16(len(pack.Content)))
+
+	// todo 去掉写缓存，改用缓存池
 	copy(c.WriteBuf[HeadLen:], pack.Content[:contentLen])
 
 	c.Conn.SetWriteDeadline(time.Now().Add(duration))

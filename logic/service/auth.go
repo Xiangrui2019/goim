@@ -12,25 +12,6 @@ type authService struct{}
 
 var AuthService = new(authService)
 
-// Auth 验证用户是否登录
-func (*authService) Auth(ctx *imctx.Context, appId, deviceId int64, token string) (int64, error) {
-	userId, ctoken, err := cache.DeviceTokenCache.Get(ctx, appId, deviceId)
-	if err != nil {
-		logger.Sugar.Error(err)
-		return 0, err
-	}
-
-	if err == nil {
-		return 0, err
-	}
-
-	if token != ctoken {
-		return 0, imerror.LErrDeviceIdOrToken
-	}
-
-	return userId, nil
-}
-
 // SignIn 登录
 func (*authService) SignIn(ctx *imctx.Context, appId int64, deviceId int64, token string, userId int64, secretKey string) error {
 	err := ctx.Session.Begin()
@@ -91,6 +72,52 @@ func (*authService) SignIn(ctx *imctx.Context, appId int64, deviceId int64, toke
 	if err != nil {
 		logger.Sugar.Error(err)
 		return err
+	}
+
+	return nil
+}
+
+// TCPAuth 登录
+func (*authService) TCPAuth(ctx *imctx.Context, appId int64, deviceId int64, userId int64, secretKey string) error {
+	deviceToken, err := cache.DeviceTokenCache.Get(ctx, appId, deviceId)
+	if err != nil {
+		logger.Sugar.Error(err)
+		return err
+	}
+
+	if deviceToken == nil {
+		return imerror.LErrDeviceIdOrToken
+	}
+
+	if deviceToken.Token != token {
+		return imerror.LErrDeviceIdOrToken
+	}
+
+	if deviceToken.UserId != userId {
+		return imerror.LErrDeviceIdOrToken
+	}
+
+	return nil
+}
+
+// Auth 验证用户是否登录
+func (*authService) Auth(ctx *imctx.Context, appId, deviceId int64, userId int64, token string) error {
+	cuserId, ctoken, err := cache.DeviceTokenCache.Get(ctx, appId, deviceId)
+	if err != nil {
+		logger.Sugar.Error(err)
+		return err
+	}
+
+	if err != nil {
+		return imerror.ErrDeviceIdOrToken
+	}
+
+	if token != ctoken {
+		return imerror.LErrDeviceIdOrToken
+	}
+
+	if userId != cuserId {
+		return imerror.LErrDeviceIdOrToken
 	}
 
 	return nil

@@ -11,7 +11,7 @@
  Target Server Version : 80016
  File Encoding         : 65001
 
- Date: 01/09/2019 18:04:28
+ Date: 06/09/2019 22:42:34
 */
 
 SET NAMES utf8mb4;
@@ -116,38 +116,38 @@ CREATE TABLE `group_user` (
 DROP TABLE IF EXISTS `message`;
 CREATE TABLE `message` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `message_id` varchar(50) COLLATE utf8mb4_bin NOT NULL COMMENT '消息id',
   `app_id` int(11) NOT NULL COMMENT 'app_id',
   `user_id` bigint(20) unsigned NOT NULL COMMENT '用户id',
-  `message_id` bigint(20) unsigned NOT NULL COMMENT '消息id',
   `sender_type` tinyint(3) NOT NULL COMMENT '发送者类型',
   `sender_id` bigint(20) unsigned NOT NULL COMMENT '发送者id',
   `sender_device_id` bigint(20) unsigned NOT NULL COMMENT '发送设备id',
   `receiver_type` tinyint(3) NOT NULL COMMENT '接收者类型,1:个人；2：群组',
   `receiver_id` bigint(20) unsigned NOT NULL COMMENT '接收者id,如果是单聊信息，则为user_id，如果是群组消息，则为group_id',
   `to_user_ids` varchar(255) COLLATE utf8mb4_bin NOT NULL COMMENT '需要@的用户id列表，多个用户用，隔开',
-  `message_content_id` text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL COMMENT '内容',
+  `message_body_id` bigint(20) NOT NULL COMMENT '消息体id',
   `user_seq` bigint(20) unsigned NOT NULL COMMENT '消息序列号',
   `send_time` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '消息发送时间',
-  `status` tinyint(255) NOT NULL COMMENT '消息状态，0：未处理1：消息撤回',
+  `status` tinyint(255) NOT NULL DEFAULT '0' COMMENT '消息状态，0：未处理1：消息撤回',
   `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `update_time` datetime NOT NULL COMMENT '更新时间',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `idx_user_id_sequence` (`user_id`,`user_seq`),
+  UNIQUE KEY `idx_user_id_seq` (`user_id`,`user_seq`),
   KEY `idx_message_id` (`message_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='消息';
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='消息';
 
 -- ----------------------------
--- Table structure for message_content
+-- Table structure for message_body
 -- ----------------------------
-DROP TABLE IF EXISTS `message_content`;
-CREATE TABLE `message_content` (
-  `id` bigint(20) NOT NULL COMMENT '自增主键',
-  `message_content_id` bigint(20) NOT NULL COMMENT '消息内容id',
+DROP TABLE IF EXISTS `message_body`;
+CREATE TABLE `message_body` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `message_body_id` bigint(20) unsigned NOT NULL COMMENT '消息内容id',
   `content` text COLLATE utf8mb4_bin NOT NULL COMMENT '消息内容',
-  `create_time` datetime NOT NULL COMMENT '创建时间',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_message_content_id` (`message_content_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+  UNIQUE KEY `uk_message_content_id` (`message_body_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='消息体';
 
 -- ----------------------------
 -- Table structure for uid

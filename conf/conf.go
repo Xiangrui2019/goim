@@ -12,16 +12,17 @@ var (
 
 // connect配置
 var (
-	ConnectRPCClientIPs = []string{
-		"127.0.0.1:60000",
-	}
 	ConnectTCPListenIP   = "127.0.0.1"
 	ConnectTCPListenPort = "50000"
+
+	ConnectRPCServerIP = "127.0.0.1:60001"
+	ConnectRPCClientIP = "127.0.0.1:60000"
 )
 
 // logic配置
 var (
 	LogicRPCServerIP  = "127.0.0.1:60000"
+	LogicRPCClinetIP  = "127.0.0.1:60001"
 	LogicHTTPListenIP = "127.0.0.1:8000"
 )
 

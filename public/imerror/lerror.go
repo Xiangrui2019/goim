@@ -29,9 +29,9 @@ func WrapLErrorWithData(err *LError, data interface{}) *LError {
 
 // 通用错误
 var (
-	LErrUnauthorized      = NewLError(1, "unauthorized")               // 需要认证
-	LErrBadRequest        = NewLError(2, "bad request")                // 请求错误
-	LErrUnknow            = NewLError(3, "unkown error")               // 未知错误
+	LErrUnauthorized      = NewLError(1, "error unauthorized")         // 需要认证
+	LErrBadRequest        = NewLError(2, "error bad request")          // 请求错误
+	LErrUnknown           = NewLError(3, "error unknown error")        // 未知错误
 	LErrDeviceNotBindUser = NewLError(4, "error device not bind user") // 设备没有绑定用户
 )
 

@@ -6,6 +6,8 @@ import (
 	"goim/public/logger"
 	"strconv"
 	"time"
+
+	"github.com/go-redis/redis"
 )
 
 const (
@@ -35,12 +37,12 @@ func (c *deviceTokenCache) Set(ctx *imctx.Context, appId, deviceId, userId int64
 }
 
 // Get 获取设备token
-func (c *deviceTokenCache) Get(ctx *imctx.Context, appId, deviceId int64) (int64, string, error) {
+func (c *deviceTokenCache) Get(ctx *imctx.Context, appId, deviceId int64) (*model.DeviceToken, error) {
 	deviceToken := model.DeviceToken{}
 	err := get(c.Key(appId, deviceId), &deviceToken)
-	if err != nil {
+	if err != nil && err != redis.Nil {
 		logger.Sugar.Error(err)
-		return 0, "", err
+		return nil, err
 	}
-	return deviceToken.UserId, deviceToken.Token, nil
+	return &deviceToken, nil
 }

@@ -1,6 +1,7 @@
 package connect
 
 import (
+	"fmt"
 	"time"
 
 	"encoding/json"
@@ -168,11 +169,13 @@ func publishMessageSend(send transfer.MessageSend) {
 // publishMessageACK 发布消息回执
 func publishMessageACK(ack transfer.MessageACK) {
 	body, err := jsoniter.Marshal(ack)
+	fmt.Println(err)
 	if err != nil {
 		logger.Sugar.Error(err)
 		return
 	}
 	err = producer.Publish("message_ack", body)
+
 	if err != nil {
 		logger.Sugar.Error(err)
 	}
