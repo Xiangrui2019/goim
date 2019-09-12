@@ -1,7 +1,6 @@
 package service
 
 import (
-	"goim/logic/cache"
 	"goim/logic/dao"
 	"goim/public/imctx"
 	"goim/public/imerror"
@@ -12,113 +11,32 @@ type authService struct{}
 
 var AuthService = new(authService)
 
-// SignIn 登录
-func (*authService) SignIn(ctx *imctx.Context, appId int64, deviceId int64, token string, userId int64, secretKey string) error {
-	err := ctx.Session.Begin()
-	if err != nil {
-		logger.Sugar.Error(err)
-		return err
-	}
-	defer func() {
-		err = ctx.Session.Rollback()
-		if err != nil {
-			logger.Sugar.Error(err)
-		}
-	}()
-
+// SignIn 长连接登录
+func (*authService) SignIn(ctx *imctx.Context, appId, userId, deviceId int64, token string) error {
 	// 用户验证
-	if !VerifySecretKey(appId, userId, secretKey) {
-		return imerror.LErrSecretKey
-	}
-
-	// 设备验证
-	device, err := dao.DeviceDao.Get(ctx, appId, deviceId)
-	if err != nil {
-		logger.Sugar.Error(err)
-		return err
-	}
-
-	if device == nil {
-		return imerror.LErrDeviceNotFound
-	}
-
-	if device.Token != token {
+	if !VerifyToken(appId, appId, deviceId, token) {
 		return imerror.LErrToken
 	}
 
-	user, err := dao.UserDao.Get(ctx, appId, userId)
+	// 设备验证
+	// todo 检查设备是否存在
+	// todo 检查用户是否存在
+
+	err := dao.DeviceDao.UpdateUserId(ctx, appId, deviceId, userId)
 	if err != nil {
 		logger.Sugar.Error(err)
 		return err
 	}
-
-	if user == nil {
-		return imerror.LErrUserNotFound
-	}
-
-	err = dao.DeviceDao.UpdateUserId(ctx, appId, deviceId, userId)
-	if err != nil {
-		logger.Sugar.Error(err)
-		return err
-	}
-
-	err = cache.DeviceTokenCache.Set(ctx, appId, deviceId, userId, token)
-	if err != nil {
-		logger.Sugar.Error(err)
-		return err
-	}
-
-	err = ctx.Session.Commit()
-	if err != nil {
-		logger.Sugar.Error(err)
-		return err
-	}
-
-	return nil
-}
-
-// TCPAuth 登录
-func (*authService) TCPAuth(ctx *imctx.Context, appId int64, deviceId int64, userId int64, secretKey string) error {
-	deviceToken, err := cache.DeviceTokenCache.Get(ctx, appId, deviceId)
-	if err != nil {
-		logger.Sugar.Error(err)
-		return err
-	}
-
-	if deviceToken == nil {
-		return imerror.LErrDeviceIdOrToken
-	}
-
-	if deviceToken.Token != token {
-		return imerror.LErrDeviceIdOrToken
-	}
-
-	if deviceToken.UserId != userId {
-		return imerror.LErrDeviceIdOrToken
-	}
-
 	return nil
 }
 
 // Auth 验证用户是否登录
-func (*authService) Auth(ctx *imctx.Context, appId, deviceId int64, userId int64, token string) error {
-	cuserId, ctoken, err := cache.DeviceTokenCache.Get(ctx, appId, deviceId)
-	if err != nil {
-		logger.Sugar.Error(err)
-		return err
-	}
-
-	if err != nil {
-		return imerror.ErrDeviceIdOrToken
-	}
-
-	if token != ctoken {
-		return imerror.LErrDeviceIdOrToken
-	}
-
-	if userId != cuserId {
-		return imerror.LErrDeviceIdOrToken
-	}
-
+func (*authService) Auth(ctx *imctx.Context, appId, userId, deviceId int64, token string) error {
+	// 进行一次鉴权
 	return nil
+}
+
+// VerifySecretKey 对用户秘钥进行校验
+func VerifyToken(appid, userId, diviceId int64, token string) bool {
+	return true
 }

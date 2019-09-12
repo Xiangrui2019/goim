@@ -23,11 +23,15 @@ func (s *LogicRPCServer) SignIn(req transfer.SignInReq, resp *transfer.SignInRes
 	err := proto.Unmarshal(req.Bytes, &signInReq)
 	if err != nil {
 		logger.Sugar.Error(err)
-		return err
+		transfer.ErrorToSignInResp(err)
+		return nil
 	}
 
-	err = service.AuthService.TCPAuth(Context(), signInReq.AppId, signInReq.DeviceId, signInReq.UserId, signInReq.Token)
-
+	err = service.AuthService.SignIn(Context(), signInReq.AppId, signInReq.UserId, signInReq.DeviceId, signInReq.Token)
+	if err != nil {
+		logger.Sugar.Error(err)
+	}
+	resp = transfer.ErrorToSignInResp(err)
 	return nil
 }
 
@@ -65,7 +69,7 @@ func (s *LogicRPCServer) MessageACK(req transfer.MessageAckReq, resp *transfer.M
 }
 
 // Offline 设备离线
-func (s *LogicRPCServer) Offline(req transfer.SendMessageReq, resp *transfer.SendMessageResp) error {
+func (s *LogicRPCServer) Offline(req transfer.OfflineReq, resp *transfer.OfflineResp) error {
 
 	return nil
 }

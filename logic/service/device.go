@@ -20,14 +20,19 @@ type deviceService struct{}
 
 var DeviceService = new(deviceService)
 
-// Regist 注册设备
-func (*deviceService) Regist(ctx *imctx.Context, device model.Device) (int64, string, error) {
+// Register 注册设备
+func (*deviceService) Register(ctx *imctx.Context, device model.Device) (int64, string, error) {
 	err := ctx.Session.Begin()
 	if err != nil {
 		logger.Sugar.Error(err)
 		return 0, "", err
 	}
-	defer ctx.Session.Rollback()
+	defer func() {
+		err = ctx.Session.Rollback()
+		if err != nil {
+			logger.Sugar.Error(err)
+		}
+	}()
 
 	UUID := uuid.NewV4()
 	device.Token = UUID.String()
@@ -37,7 +42,7 @@ func (*deviceService) Regist(ctx *imctx.Context, device model.Device) (int64, st
 		return 0, "", err
 	}
 
-	err = dao.SyncSequenceDao.Add(ctx, device.AppId, device.Id, 0)
+	err = dao.DeviceAckDao.Add(ctx, device.AppId, device.Id, 0)
 	if err != nil {
 		logger.Sugar.Error(err)
 		return 0, "", err

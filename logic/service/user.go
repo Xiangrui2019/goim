@@ -52,11 +52,6 @@ func (*userService) Add(ctx *imctx.Context, deviceId int64, user model.User) err
 	return nil
 }
 
-// VerifySecretKey 对用户秘钥进行校验
-func VerifySecretKey(appid int64, userId int64, secretKey string) bool {
-	return true
-}
-
 // Get 获取用户信息
 func (*userService) Get(ctx *imctx.Context, appId, userId int64) (*model.User, error) {
 	user, err := dao.UserDao.Get(ctx, appId, userId)

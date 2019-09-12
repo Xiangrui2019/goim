@@ -1,14 +1,21 @@
 package imerror
 
-import "goim/public/pb"
+import (
+	"goim/public/logger"
+	"goim/public/pb"
+	"goim/public/transfer"
 
-var (
-	CCodeSuccess = 0 // 成功发送
+	"github.com/golang/protobuf/proto"
+)
+
+const (
+	CodeSuccess    = 0    // code成功
+	MessageSuccess = "OK" // message成功
 )
 
 // Error 接入层调用错误
 type Error struct {
-	Code    int
+	Code    int32
 	Message string
 }
 
@@ -24,8 +31,36 @@ func NewError(code int, message string) *Error {
 }
 
 var (
-	ErrUnknown         = NewError(int(pb.ErrCode_SERVER_UNKNOWN), "error unknown error") // 服务器位置错误
+	ErrUnknown         = NewError(int(pb.ErrCode_SERVER_UNKNOWN), "error unknown error") // 服务器未知错误
 	ErrDeviceIdOrToken = NewError(1001, "error device token")                            // 设备id或者token错误
 	ErrNotIsFriend     = NewError(2, "error not is friend")                              // 非好友关系
 	ErrNotInGroup      = NewError(3, "error not in group")                               // 没有在群组内
+	LErrToken          = NewLError(1003, "error secret key")                             // 用户秘钥错误
 )
+
+func ErrorToSignInResp(err error) *transfer.SignInResp {
+	if err != nil {
+		e, ok := err.(*Error)
+		if ok {
+			return NewSignInResp(e.Code, e.Message)
+		} else {
+			return NewSignInResp(ErrUnknown.Code, ErrUnknown.Message)
+		}
+	}
+	return NewSignInResp(CodeSuccess, MessageSuccess)
+}
+
+func NewSignInResp(code int32, message string) *transfer.SignInResp {
+	resp := pb.SignInResp{
+		Code:    code,
+		Message: message,
+	}
+	bytes, err := proto.Marshal(&resp)
+	if err != nil {
+		logger.Sugar.Error(err)
+	}
+	return &transfer.SignInResp{
+		Result: code == CodeSuccess,
+		Bytes:  bytes,
+	}
+}

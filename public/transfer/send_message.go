@@ -7,5 +7,11 @@ type SendMessageReq struct {
 }
 
 type SendMessageResp struct {
-	Bytes []byte
+	Code    int32
+	Message string
+	Bytes   []byte
+}
+
+func NewSendMessageResp() {
+
 }
