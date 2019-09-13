@@ -6,8 +6,8 @@ const (
 )
 
 type DeliverMessageReq struct {
-	DeviceId int64
-	Bytes    []byte
+	DeviceId int64  // 设备id
+	Bytes    []byte // 消息投递字节包
 }
 
 type DeliverMessageResp struct {

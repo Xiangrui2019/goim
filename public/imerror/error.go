@@ -1,11 +1,7 @@
 package imerror
 
 import (
-	"goim/public/logger"
 	"goim/public/pb"
-	"goim/public/transfer"
-
-	"github.com/golang/protobuf/proto"
 )
 
 const (
@@ -23,7 +19,7 @@ func (e *Error) Error() string {
 	return e.Message
 }
 
-func NewError(code int, message string) *Error {
+func NewError(code int32, message string) *Error {
 	return &Error{
 		Code:    code,
 		Message: message,
@@ -31,36 +27,10 @@ func NewError(code int, message string) *Error {
 }
 
 var (
-	ErrUnknown         = NewError(int(pb.ErrCode_SERVER_UNKNOWN), "error unknown error") // 服务器未知错误
-	ErrDeviceIdOrToken = NewError(1001, "error device token")                            // 设备id或者token错误
-	ErrNotIsFriend     = NewError(2, "error not is friend")                              // 非好友关系
-	ErrNotInGroup      = NewError(3, "error not in group")                               // 没有在群组内
-	LErrToken          = NewLError(1003, "error secret key")                             // 用户秘钥错误
+	ErrUnknown         = NewError(int32(pb.ErrCode_SERVER_UNKNOWN), "error unknown error") // 服务器未知错误
+	ErrUnauthorized    = NewError(int32(pb.ErrCode_UNAUTHORIZED), "error unauthorized")    // 未登录
+	ErrDeviceIdOrToken = NewError(1001, "error device token")                              // 设备id或者token错误
+	ErrNotIsFriend     = NewError(2, "error not is friend")                                // 非好友关系
+	ErrNotInGroup      = NewError(3, "error not in group")                                 // 没有在群组内
+	LErrToken          = NewLError(1003, "error secret key")                               // 用户秘钥错误
 )
-
-func ErrorToSignInResp(err error) *transfer.SignInResp {
-	if err != nil {
-		e, ok := err.(*Error)
-		if ok {
-			return NewSignInResp(e.Code, e.Message)
-		} else {
-			return NewSignInResp(ErrUnknown.Code, ErrUnknown.Message)
-		}
-	}
-	return NewSignInResp(CodeSuccess, MessageSuccess)
-}
-
-func NewSignInResp(code int32, message string) *transfer.SignInResp {
-	resp := pb.SignInResp{
-		Code:    code,
-		Message: message,
-	}
-	bytes, err := proto.Marshal(&resp)
-	if err != nil {
-		logger.Sugar.Error(err)
-	}
-	return &transfer.SignInResp{
-		Result: code == CodeSuccess,
-		Bytes:  bytes,
-	}
-}

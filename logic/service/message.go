@@ -29,12 +29,12 @@ var MessageService = new(messageService)
 
 // Add 添加消息
 func (*messageService) Add(ctx *imctx.Context, message model.Message) error {
-	return dao.MessageDao.Add(ctx, message)
+	return dao.MessageDao.Add(ctx, "message", message)
 }
 
 // ListByUserIdAndSequence 查询消息
-func (*messageService) ListByUserIdAndSequence(ctx *imctx.Context, userId int64, sequence int64) ([]*model.Message, error) {
-	return dao.MessageDao.ListByUserIdAndSequence(ctx, userId, sequence)
+func (*messageService) ListByUserIdAndSequence(ctx *imctx.Context, appId, userId, seq int64) ([]*model.Message, error) {
+	return dao.MessageDao.ListByUserIdAndUserSeq(ctx, "message", appId, userId, seq)
 }
 
 // SendToUser 消息发送至用户

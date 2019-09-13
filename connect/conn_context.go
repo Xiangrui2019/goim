@@ -22,7 +22,7 @@ const (
 // ConnContext 连接上下文
 type ConnContext struct {
 	Codec    *Codec // 编解码器
-	IsSignIn bool   // 标记连接是否登录
+	IsSignIn bool   // 标记连接是否登录成功
 	DeviceId int64  // 设备id
 	UserId   int64  // 用户id
 }

@@ -62,7 +62,7 @@ func handleSyncTrigger(msg *nsq.Message) error {
 		zap.Int64("user_id", trigger.UserId),
 		zap.Int64("sync_sequence", trigger.SyncSequence))
 
-	dbMessages, err := dao.MessageDao.ListByUserIdAndSequence(ctx, trigger.UserId, trigger.SyncSequence)
+	dbMessages, err := dao.MessageDao.ListByUserIdAndUserSeq(ctx, trigger.UserId, trigger.SyncSequence)
 	if err != nil {
 		logger.Sugar.Error(err)
 		return err

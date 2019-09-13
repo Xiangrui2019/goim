@@ -1,23 +1,25 @@
 package transfer
 
 import (
-	"github.com/golang/protobuf/proto"
 	"goim/public/imerror"
+	"goim/public/logger"
 	"goim/public/pb"
+
+	"github.com/golang/protobuf/proto"
 )
 
 // 同步消息触发
 type SyncReq struct {
-	DeviceId int64  `json:"device_id"`     // 设备id
-	UserId   int64  `json:"user_id"`       // 用户id
-	Bytes    []byte `json:"sync_sequence"` // 已经同步的消息序列号
+	IsSignIn bool   // 标记用户是否登录成功
+	DeviceId int64  // 设备id
+	UserId   int64  // 用户id
+	Bytes    []byte // 同步消息字节包
 }
 
 // 同步消息触发
 type SyncResp struct {
-	Code    int32
-	Message string
-	Bytes   []byte
+	ConnectStatus int    // 连接状态
+	Bytes         []byte // 字节包
 }
 
 // NewSyncResp 创建NewSyncResp
@@ -29,11 +31,16 @@ func NewSyncResp(code int32, message string, messages []*pb.MessageItem) *SyncRe
 	}
 
 	bytes, err := proto.Marshal(&syncResp)
-	if err != nil
+	if err != nil {
+		logger.Sugar.Error(err)
+	}
+	connectStatus := ConnectStatusBreak
+	if code == imerror.CodeSuccess {
+		connectStatus = ConnectStatusOK
+	}
 	return &SyncResp{
-		Code:    code,
-		Message: message,
-		Bytes:   bytes,
+		ConnectStatus: connectStatus,
+		Bytes:         bytes,
 	}
 }
 

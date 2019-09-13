@@ -8,11 +8,6 @@ import (
 	"github.com/golang/protobuf/proto"
 )
 
-const (
-	CodeSignInSuccess = 1
-	CodeSignInFail    = 2
-)
-
 // SignIn 设备登录
 type SignInReq struct {
 	Bytes []byte
@@ -20,10 +15,8 @@ type SignInReq struct {
 
 //  SignInACK 设备登录回执
 type SignInResp struct {
-	Result   bool
-	DeviceId int64
-	UserId   int64
-	Bytes    []byte
+	ConnectStatus int    // 连接状态
+	Bytes         []byte // 设备登录响应消息包
 }
 
 // NewSignInResp 创建NewSignInResp
@@ -36,12 +29,17 @@ func NewSignInResp(code int32, message string) *SignInResp {
 	if err != nil {
 		logger.Sugar.Error(err)
 	}
+	connectStatus := ConnectStatusBreak
+	if code == imerror.CodeSuccess {
+		connectStatus = ConnectStatusOK
+	}
 	return &SignInResp{
-		Result: code == imerror.CodeSuccess,
-		Bytes:  bytes,
+		ConnectStatus: connectStatus,
+		Bytes:         bytes,
 	}
 }
 
+// ErrorToSignInResp 将error转化成SignInResp
 func ErrorToSignInResp(err error) *SignInResp {
 	if err != nil {
 		e, ok := err.(*imerror.Error)
