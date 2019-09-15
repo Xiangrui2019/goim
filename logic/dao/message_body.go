@@ -1,12 +1,11 @@
 package dao
 
 import (
+	"database/sql"
 	"fmt"
 	"goim/logic/model"
 	"goim/public/imctx"
 	"goim/public/logger"
-	"strconv"
-	"strings"
 )
 
 type messageBodyDao struct{}
@@ -25,31 +24,16 @@ func (*messageBodyDao) Add(ctx *imctx.Context, tableName string, messageBodyId i
 }
 
 // List 根据消息体id查询消息体
-func (*messageBodyDao) List(ctx *imctx.Context, tableName string, messageBodyIds []int64) ([]*model.MessageBody, error) {
-	var build strings.Builder
-	for i := range messageBodyIds {
-		build.WriteString(strconv.FormatInt(messageBodyIds[i], 10))
-		if i != len(messageBodyIds)-1 {
-			build.WriteString(",")
-		}
-	}
+func (*messageBodyDao) Get(ctx *imctx.Context, tableName string, messageBodyId int64) (*model.MessageBody, error) {
+	sqlStr := fmt.Sprintf(`select message_body_id,content from %s where message_body_id = ?`, tableName)
+	row := ctx.Session.QueryRow(sqlStr, messageBodyId)
 
-	sql := fmt.Sprintf(`select message_body_id,content from %s where message_body_id in (%s)`, tableName, build.String())
-	rows, err := ctx.Session.Query(sql)
-	if err != nil {
+	body := new(model.MessageBody)
+	err := row.Scan(&body.MessageBodyId, &body.Content)
+	if err != nil && err != sql.ErrNoRows {
 		logger.Sugar.Error(err)
 		return nil, err
 	}
 
-	bodys := make([]*model.MessageBody, 0, len(messageBodyIds))
-	for rows.Next() {
-		body := new(model.MessageBody)
-		err := rows.Scan(&body.MessageBodyId, &body.Content)
-		if err != nil {
-			logger.Sugar.Error(err)
-			return nil, err
-		}
-		bodys = append(bodys, body)
-	}
-	return bodys, nil
+	return body, nil
 }

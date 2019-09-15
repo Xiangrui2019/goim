@@ -49,6 +49,8 @@ func (s *LogicRPCServer) Sync(req transfer.SyncReq, resp *transfer.SyncResp) err
 		logger.Sugar.Error(err)
 		return err
 	}
+
+	message, err := service.MessageService.ListByUserIdAndSeq(Context(), req.AppId, req.UserId, syncReq.DeviceAck)
 	return nil
 }
 

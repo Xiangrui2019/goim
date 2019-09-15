@@ -6,6 +6,7 @@ const (
 )
 
 type DeliverMessageReq struct {
+	AppId    int64  // appId
 	DeviceId int64  // 设备id
 	Bytes    []byte // 消息投递字节包
 }

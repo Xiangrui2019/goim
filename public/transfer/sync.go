@@ -11,6 +11,7 @@ import (
 // 同步消息触发
 type SyncReq struct {
 	IsSignIn bool   // 标记用户是否登录成功
+	AppId    int64  // appId
 	DeviceId int64  // 设备id
 	UserId   int64  // 用户id
 	Bytes    []byte // 同步消息字节包
