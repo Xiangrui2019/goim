@@ -33,7 +33,7 @@ func (*messageService) Add(ctx *imctx.Context, message model.Message) error {
 }
 
 // ListByUserIdAndSequence 查询消息
-func (*messageService) ListByUserIdAndSeq(ctx *imctx.Context, appId, userId, seq int64) ([]*model.Message, error) {
+func (*messageService) ListByUserIdAndSeq(ctx *imctx.Context, appId, userId, seq int64) ([]model.Message, error) {
 	messages, err := dao.MessageDao.ListByUserIdAndUserSeq(ctx, "message", appId, userId, seq)
 	if err != nil {
 		logger.Sugar.Error(err)
@@ -50,7 +50,7 @@ func (*messageService) ListByUserIdAndSeq(ctx *imctx.Context, appId, userId, seq
 			logger.Logger.Error("message body is nil", zap.Int64("message_body_id", messages[i].MessageBodyId))
 			continue
 		}
-		messages[i].MessageBody = messageBody.Content
+		messages[i].MessageBody = *messageBody
 	}
 	return messages, nil
 }

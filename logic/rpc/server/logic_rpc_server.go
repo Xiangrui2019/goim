@@ -2,6 +2,7 @@ package server
 
 import (
 	"goim/logic/db"
+	"goim/logic/model"
 	"goim/logic/service"
 	"goim/public/imctx"
 	"goim/public/imerror"
@@ -51,6 +52,12 @@ func (s *LogicRPCServer) Sync(req transfer.SyncReq, resp *transfer.SyncResp) err
 	}
 
 	message, err := service.MessageService.ListByUserIdAndSeq(Context(), req.AppId, req.UserId, syncReq.DeviceAck)
+	if err != nil {
+		logger.Sugar.Error(err)
+		resp = transfer.ErrorToSyncResp(imerror.ErrUnauthorized, nil)
+		return nil
+	}
+	resp = transfer.ErrorToSyncResp(nil, model.MessagesToPB(message))
 	return nil
 }
 

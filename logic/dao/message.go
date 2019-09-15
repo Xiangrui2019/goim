@@ -24,7 +24,7 @@ func (*messageDao) Add(ctx *imctx.Context, tableName string, message model.Messa
 }
 
 // ListByUserIdAndUserSeq 根据用户id查询大于序号大于sequence的消息
-func (*messageDao) ListByUserIdAndUserSeq(ctx *imctx.Context, tableName string, appId, userId, userSeq int64) ([]*model.Message, error) {
+func (*messageDao) ListByUserIdAndUserSeq(ctx *imctx.Context, tableName string, appId, userId, userSeq int64) ([]model.Message, error) {
 	sql := fmt.Sprintf(`select message_id,app_id,user_id,sender_type,sender_id,sender_device_id,receiver_type,receiver_id,to_user_ids,message_body_id,user_seq,send_time from %s where app_id = ? and user_id = ? and user_seq > ?`, tableName)
 	rows, err := ctx.Session.Query(sql, appId, userId, userSeq)
 	if err != nil {
